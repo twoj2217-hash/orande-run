@@ -145,7 +145,11 @@ export function ApplyPageContent() {
     if (!selectedTierId) next.tier = "참여할 코스를 선택해 주세요."
     if (!cityId) next.cityId = "거주 지역을 선택해 주세요."
     if (cityId === "daejeon" && !district) next.district = "구를 선택해 주세요."
-    if (cityId === "outside" && !outsideRegion.trim()) next.outsideRegion = "거주 지역을 입력해 주세요."
+    if (cityId === "outside" && !outsideRegion.trim()) {
+      next.outsideRegion = "거주 지역을 입력해 주세요."
+    } else if (cityId === "outside" && outsideRegion.trim().length > 50) {
+      next.outsideRegion = "거주 지역은 50자 이하로 입력해 주세요."
+    }
     if (!form.name.trim()) next.name = "이름을 입력해 주세요."
     if (!/^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$/.test(form.phone.replace(/\s/g, ""))) {
       next.phone = "올바른 휴대폰 번호를 입력해 주세요."
@@ -260,10 +264,10 @@ export function ApplyPageContent() {
   )
 
   return (
-    <div className="min-h-screen bg-orange-50/80 pb-28 md:pb-10">
+    <div className="min-h-screen bg-orange-50/80 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-10">
       <ApplySuccessModal open={showSuccessModal} payload={successPayload} onClose={handleModalClose} />
 
-      <div className="container mx-auto px-6 py-10 max-w-2xl">
+      <div className="container mx-auto px-6 py-6 md:py-10 max-w-2xl">
         <Link
           href="/#join"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-orange-600 mb-6"
@@ -287,7 +291,7 @@ export function ApplyPageContent() {
 
         <ApplyProgress />
 
-        <form id="apply-form" onSubmit={handleSubmit} className="space-y-10" noValidate>
+        <form id="apply-form" onSubmit={handleSubmit} className="space-y-6 md:space-y-10" noValidate>
           <ApplyFormStep
             id="step-tier"
             headingId="tier-heading"
@@ -455,6 +459,7 @@ export function ApplyPageContent() {
             stepNumber={3}
             summary={scheduleSummary}
             isComplete={!!scheduleSummary}
+            collapseWhenComplete={false}
           >
             <p className="text-sm text-muted-foreground mb-4 text-ko-balance">{runningPreferenceCopy.sectionHint}</p>
             <div className="rounded-2xl border border-orange-200 bg-white p-6 space-y-5">
@@ -592,6 +597,7 @@ export function ApplyPageContent() {
             stepNumber={5}
             summary={shippingSummary}
             isComplete={Boolean(shippingZipcode && shippingAddress && shippingAddressDetail.trim())}
+            collapseWhenComplete={false}
           >
             <p className="text-sm text-muted-foreground mb-4 text-ko-balance">{shippingAddressCopy.sectionHint}</p>
             <div className="rounded-2xl border border-orange-200 bg-white p-6 space-y-4">
@@ -625,7 +631,7 @@ export function ApplyPageContent() {
             </div>
           </ApplyFormStep>
 
-          <section id="step-consent" aria-labelledby="consent-heading">
+          <section id="step-consent" data-apply-step="step-consent" aria-labelledby="consent-heading">
             <h2 id="consent-heading" className="text-xl font-black text-foreground mb-4">
               6. 동의
             </h2>
@@ -657,7 +663,7 @@ export function ApplyPageContent() {
           <ParticipationPolicyNotes className="bg-orange-50/40" />
 
           {/* 7. 입금 안내 */}
-          <section id="step-payment" aria-labelledby="payment-heading">
+          <section id="step-payment" data-apply-step="step-payment" aria-labelledby="payment-heading">
             <h2 id="payment-heading" className="text-xl font-black text-foreground mb-4">
               7. 참가비 입금
             </h2>

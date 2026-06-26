@@ -20,29 +20,66 @@ type ApplyProgressProps = {
   className?: string
 }
 
+/** 현재 뷰포트에서 보이는 단계 요소를 찾습니다 (모바일/데스크톱 id 중복 해결). */
+function getVisibleStepElement(stepId: string): HTMLElement | null {
+  const candidates = [
+    document.getElementById(stepId),
+    document.getElementById(`${stepId}-desktop`)
+  ].filter(Boolean) as HTMLElement[]
+
+  for (const element of candidates) {
+    // offsetParent가 null이면 display:none 등으로 숨겨진 요소입니다.
+    if (element.offsetParent !== null) return element
+  }
+
+  return document.getElementById(stepId)
+}
+
 export function ApplyProgress({ className }: ApplyProgressProps) {
   const [activeIndex, setActiveIndex] = useState(0)
 
   useEffect(() => {
-    const sections = APPLY_STEP_IDS.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[]
-    if (sections.length === 0) return
+    const observeSteps = () => {
+      const sections = APPLY_STEP_IDS.map((id) => getVisibleStepElement(id)).filter(
+        Boolean
+      ) as HTMLElement[]
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-        if (visible.length > 0) {
-          const id = visible[0].target.id
-          const idx = APPLY_STEP_IDS.indexOf(id as (typeof APPLY_STEP_IDS)[number])
-          if (idx >= 0) setActiveIndex(idx)
-        }
-      },
-      { rootMargin: "-20% 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] }
-    )
+      if (sections.length === 0) return null
 
-    sections.forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((e) => e.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+          if (visible.length > 0) {
+            const target = visible[0].target as HTMLElement
+            const stepId = target.dataset.applyStep ?? target.id.replace(/-desktop$/, "")
+            const idx = APPLY_STEP_IDS.indexOf(stepId as (typeof APPLY_STEP_IDS)[number])
+            if (idx >= 0) setActiveIndex(idx)
+          }
+        },
+        { rootMargin: "-20% 0px -55% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] }
+      )
+
+      sections.forEach((el) => observer.observe(el))
+      return observer
+    }
+
+    let observer = observeSteps()
+
+    // 단계 접힘/펼침으로 높이가 바뀌면 관찰 대상을 다시 등록합니다.
+    const resizeObserver = new ResizeObserver(() => {
+      observer?.disconnect()
+      observer = observeSteps()
+    })
+
+    const form = document.getElementById("apply-form")
+    if (form) resizeObserver.observe(form)
+
+    return () => {
+      observer?.disconnect()
+      resizeObserver.disconnect()
+    }
   }, [])
 
   const currentStep = activeIndex + 1
@@ -67,7 +104,13 @@ export function ApplyProgress({ className }: ApplyProgressProps) {
           </li>
         ))}
       </ol>
-      <div className="h-1.5 w-full rounded-full bg-orange-100 overflow-hidden" role="progressbar" aria-valuenow={currentStep} aria-valuemin={1} aria-valuemax={APPLY_STEPS.length}>
+      <div
+        className="h-1.5 w-full rounded-full bg-orange-100 overflow-hidden"
+        role="progressbar"
+        aria-valuenow={currentStep}
+        aria-valuemin={1}
+        aria-valuemax={APPLY_STEPS.length}
+      >
         <div
           className="h-full rounded-full bg-orange-500 transition-all duration-300"
           style={{ width: `${progressPercent}%` }}

@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { SiteFooter } from "@/components/site-footer"
+import { LayoutFooter } from "@/components/layout-footer"
 import { brandCopy } from "@/lib/event-config"
 import "./globals.css"
 
@@ -35,7 +35,7 @@ export default function RootLayout({
         <main id="main-content" className="min-h-screen bg-background">
           {children}
         </main>
-        <SiteFooter />
+        <LayoutFooter />
       </body>
     </html>
   )
