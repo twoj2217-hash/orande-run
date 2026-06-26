@@ -69,13 +69,15 @@ export function ApplySuccessModal({ open, payload, onClose }: ApplySuccessModalP
   return (
     <Dialog
       open={open && !!payload}
-      onOpenChange={(next) => {
+      // Dialog 열림 상태 변경 — 바깥 클릭·ESC로 닫힐 때 onClose 호출
+      onOpenChange={(next: boolean) => {
         if (!next) onClose()
       }}
     >
       <DialogContent
         className="max-w-md border-orange-200 max-h-[90vh] overflow-y-auto"
-        onPointerDownOutside={(e) => e.preventDefault()}
+        // 오버레이·바깥 클릭으로 모달이 닫히지 않게 막음
+        onPointerDownOutside={(e: Event) => e.preventDefault()}
       >
         <DialogHeader className="text-center sm:text-center">
           <CheckCircle2 className="w-12 h-12 text-orange-500 mx-auto mb-2" aria-hidden />
