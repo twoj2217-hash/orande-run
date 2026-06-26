@@ -1,0 +1,26 @@
+# 의존성
+node_modules/
+
+# Next.js 빌드 산출물
+.next/
+out/
+
+# 환경 변수 (비밀값 — GitHub에 올리지 않음)
+.env
+.env*.local
+
+# 로그·디버그
+*.log
+.cursor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 에디터
+.idea/
+.vscode/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts

@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* 한글 줄바꿈: 단어 중간 끊김 방지 */
+  .text-ko {
+    @apply break-keep;
+    overflow-wrap: anywhere;
+  }
+
+  .text-ko-balance {
+    @apply text-ko text-balance;
+  }
+}
+
+@layer base {
+  :root {
+    /* OranDe Run 라이트 테마 토큰 */
+    --background: 40 40% 98%;
+    --foreground: 20 15% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 15% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 15% 15%;
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 34 80% 94%;
+    --secondary-foreground: 20 15% 15%;
+    --muted: 35 30% 94%;
+    --muted-foreground: 22 12% 42%;
+    --accent: 38 92% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 28 35% 86%;
+    --input: 28 35% 86%;
+    --ring: 24 95% 53%;
+    --chart-1: 24 95% 53%;
+    --chart-2: 32 92% 58%;
+    --chart-3: 38 88% 52%;
+    --chart-4: 16 78% 58%;
+    --chart-5: 42 90% 50%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* 다크 모드에서도 오렌지 아이덴티티를 유지합니다. */
+    --background: 22 20% 10%;
+    --foreground: 0 0% 98%;
+    --card: 22 20% 12%;
+    --card-foreground: 0 0% 98%;
+    --popover: 22 20% 12%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 24 18% 18%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 24 15% 18%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 38 92% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 24 12% 22%;
+    --input: 24 12% 22%;
+    --ring: 24 95% 53%;
+    --chart-1: 24 95% 53%;
+    --chart-2: 32 92% 58%;
+    --chart-3: 38 88% 52%;
+    --chart-4: 16 78% 58%;
+    --chart-5: 42 90% 50%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  /* 제목 줄 길이 균형 */
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  /* 브라우저 프리뷰에서 제거한 portal 좌표(left/top)를 소스에서도 유지합니다. */
+  nextjs-portal {
+    left: auto !important;
+    top: auto !important;
+  }
+
+  /* 스크린리더 전용 — 포커스 시에만 표시 */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* 모션 감소 설정 시 애니메이션 최소화 */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
