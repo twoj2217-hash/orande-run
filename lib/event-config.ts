@@ -9,7 +9,7 @@ export const brandCopy = {
   footerBrand: "OranDe Run · 오랜디런",
   // 카톡·SNS 링크 미리보기용
   metaDescription:
-    "비대면 버추얼 런, 누구나 참여. 대전 제1회 오랜디런 — 완주하면 키캡키링을 모아요.",
+    "비대면 버추얼 런, 누구나 참여. 대전 제1회 오랜디런 — 대전 버추얼 런, 뻔한 메달 말고 특별한 선물",
   // 히어로 서브카피
   heroSubline: "비대면 버추얼 런 — 누구나, 내 페이스로",
   heroSublineMobile: "비대면 버추얼 런, 누구나 참여"
