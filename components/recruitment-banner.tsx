@@ -6,6 +6,8 @@ import Link from "next/link"
 
 type RecruitmentBannerProps = {
   className?: string
+  /** apply 컨텍스트에서는 중복 안내를 줄이기 위해 일부 요소를 숨깁니다. */
+  context?: "landing" | "apply"
 }
 
 const toneStyles = {
@@ -15,9 +17,10 @@ const toneStyles = {
 }
 
 // 모집 상태별 안내 배너 (tbd / upcoming / closed)
-export function RecruitmentBanner({ className }: RecruitmentBannerProps) {
+export function RecruitmentBanner({ className, context = "landing" }: RecruitmentBannerProps) {
   const content = getRecruitmentBannerContent()
   if (!content) return null
+  if (context === "apply" && content.tone === "closed") return null
 
   return (
     <div
@@ -26,7 +29,7 @@ export function RecruitmentBanner({ className }: RecruitmentBannerProps) {
     >
       <p className="font-black text-base mb-1">{content.title}</p>
       <p className="text-sm leading-relaxed opacity-90">{content.body}</p>
-      {content.tone !== "closed" && (
+      {context === "landing" && content.tone !== "closed" && (
         <Link
           href="/apply"
           className="inline-flex mt-3 text-sm font-semibold underline underline-offset-2 hover:opacity-80"

@@ -43,7 +43,7 @@ export default function CTASection() {
           />
 
           <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-10 sm:mb-12 leading-relaxed font-medium text-ko-balance">
-            누구나 참여할 수 있는 비대면 마라톤. 완주하면 키캡키링을 모아요.
+            코스를 골랐다면 지금 신청하고, 4주 뒤 키캡키링을 받아 보세요.
           </p>
 
           <div className="grid grid-cols-3 gap-4 md:gap-8 mb-16 max-w-2xl mx-auto">

@@ -4,8 +4,8 @@
 export const brandCopy = {
   // 히어로 상단 뱃지
   heroBadge: "대전 로컬 · 제1회",
-  // 전역 푸터 — 당근 모임 출처·비공식 안내
-  footerOrigin: "당근 모임에서 시작된 비공식 커뮤니티 러닝",
+  // 전역 푸터 — 당근 모임 출처 안내
+  footerOrigin: "당근 모임에서 시작된 버추얼 러닝",
   footerBrand: "OranDe Run · 오랜디런",
   // 카톡·SNS 링크 미리보기용
   metaDescription:
@@ -15,14 +15,17 @@ export const brandCopy = {
   heroSublineMobile: "비대면 버추얼 런, 누구나 참여"
 } as const
 
-// 모집·참여 일정 — 확정되면 아래 날짜를 수정하세요 (예: "2026. 7. 1")
+// 모집·참여 일정 — 회차별로 아래만 수정하세요
 export const eventSchedule = {
   recruitment: {
-    start: "TBD",
-    end: "TBD"
+    start: "2026. 6. 29",
+    end: "2026. 7. 5"
   },
-  runStart: "TBD",
-  participationWeeks: 4
+  runStart: "2026. 7. 13",
+  runEnd: "2026. 8. 9",
+  participationWeeks: 4,
+  // 완주 인증 마감 (챌린지 종료 후 7일)
+  verificationEnd: "2026. 8. 16"
 }
 
 // 일정 미확정 시 화면에 보여줄 대체 문구입니다.
@@ -44,6 +47,37 @@ export function getRecruitmentPeriodLabel(): string {
 // 참여 시작일 라벨
 export function getRunStartLabel(): string {
   return formatScheduleDate(eventSchedule.runStart)
+}
+
+// 참여 종료일 라벨 (runEnd 미설정 시 시작일 + participationWeeks 로 계산)
+export function getRunEndLabel(): string {
+  if (eventSchedule.runEnd && eventSchedule.runEnd !== "TBD") {
+    return formatScheduleDate(eventSchedule.runEnd)
+  }
+
+  const startDate = parseScheduleDate(eventSchedule.runStart)
+  if (!startDate) return SCHEDULE_TBD_LABEL
+
+  const endDate = new Date(startDate)
+  endDate.setDate(endDate.getDate() + eventSchedule.participationWeeks * 7 - 1)
+  return `${endDate.getFullYear()}. ${endDate.getMonth() + 1}. ${endDate.getDate()}`
+}
+
+// 참여 기간 한 줄 라벨 (랜딩·신청 폼)
+export function getRunPeriodLabel(): string {
+  const start = getRunStartLabel()
+  const end = getRunEndLabel()
+
+  if (start === SCHEDULE_TBD_LABEL || end === SCHEDULE_TBD_LABEL) {
+    return `${start} · ${eventSchedule.participationWeeks}주 챌린지`
+  }
+
+  return `${start} ~ ${end} · ${eventSchedule.participationWeeks}주`
+}
+
+// 완주 인증 마감일 라벨
+export function getVerificationEndLabel(): string {
+  return formatScheduleDate(eventSchedule.verificationEnd)
 }
 
 // 키캡키링 발송 예상 시점 안내
@@ -171,12 +205,23 @@ export const verificationConfig = {
   hashtags: ["#오랜디런", "#OranDeRun"],
   email: "운영진@example.com",
   emailSubjectTemplate: "[오랜디런 인증] {name}_{tier}_{date}",
-  deadlineNote: "챌린지 종료 후 7일 이내"
+  deadlineNote: "챌린지 종료 후 7일 이내 (8/16까지)",
+  // 인증 기간(8/10~8/16)에 추가로 달린 기록도 완주로 인정
+  graceNote:
+    "8/9까지 코스 거리를 채우지 못했다면, 8/16까지 남은 거리를 달린 뒤 그 기록을 인증해 주세요. 인증 기간 안에 제출된 기록은 완주로 인정합니다."
+} as const
+
+// 키캡키링 발송지 입력 섹션 카피
+export const shippingAddressCopy = {
+  sectionTitle: "키캡키링 발송지",
+  sectionHint:
+    "완주 리워드 키캡키링을 받을 주소예요. 거주 지역과 다르면 실제 수령 주소를 입력해 주세요.",
+  detailPlaceholder: "동·호수, 공동현관 비밀번호 등"
 } as const
 
 // 개인정보 동의 요약 (체크박스 보조 문구)
 export const privacyConsentSummary =
-  "이름, 연락처, 지역, 러닝 계획(선택) 수집·참가 안내·운영 목적, 챌린지 종료 후 1년 보관"
+  "이름, 연락처, 지역, 발송지 주소, 러닝 계획(선택) 수집·참가 안내·리워드 발송·운영 목적, 챌린지 종료 후 1년 보관"
 
 // 신청 완료자 전용 진행 안내 카피
 export const participantGuide = {
@@ -188,10 +233,10 @@ export const participantGuide = {
     {
       phase: "3",
       title: "혼자도 좋고, 함께도 좋아요",
-      body: "혼자 편하게 달려도 좋고, 가끔은 누군가와 함께 달려보고 싶을 수도 있잖아요. 원하시는 분들이 계시면 비슷한 동네나 시간대의 참가자 3~4분 정도가 함께하는 작은 톡방으로 연결해 드릴 수도 있어요. 달리기 기록을 공유하거나 가볍게 응원하며 각자의 페이스대로 달려보세요. 참여는 자유이며, 원하시는 분들에 한해 안내드릴 예정이에요.",
+      body: "혼자 편하게 달려도 괜찮아요. 원하시면 비슷한 동네·시간대 참가자와 소규모 톡방 연결을 안내해 드려요. 참여는 선택 사항이에요.",
       // compact 모달용 짧은 요약
       bodyCompact:
-        "혼자 달려도 OK. 원하시면 비슷한 동네·시간대 참가자 3~4명 규모의 작은 톡방으로 연결해 드릴 수 있어요. 참여는 자유예요."
+        "원하시면 비슷한 동네·시간대 참가자 소규모 톡방 연결을 안내해 드려요. (선택)"
     },
     { phase: "4", title: "완주 인증", body: "SNS 해시태그 또는 메일로 기록을 보내 주세요." },
     { phase: "5", title: "키캡키링 발송", body: "인증 확인 후 코스별 키캡키링을 보내 드려요." }
@@ -199,17 +244,18 @@ export const participantGuide = {
   togetherNote: "위 안내는 모두 선택 사항이에요. 편한 방식으로만 참여해 주세요."
 } as const
 
-// 수동 입금 안내 — 모집 전 실제 계좌 정보로 반드시 수정하세요
+// 수동 입금 안내
 export const paymentInfo = {
   bank: "카카오뱅크",
-  accountNumber: "3333-01-1234567",
+  accountNumber: "3333-3779-35707",
   accountHolder: "오랜디런"
 } as const
 
-// 문의처 — ID 확정 후 kakaoId만 수정하세요
+// 문의처 — 카카오톡 오픈채팅
 export const supportContact = {
-  label: "카카오톡",
-  kakaoId: "kakao ID"
+  label: "카카오톡 오픈채팅",
+  displayName: "OranDe run 문의",
+  openChatUrl: "https://open.kakao.com/o/sR2UpiBi"
 } as const
 
 // 참가 운영 안내 (중복 참여·취소·코스 변경)

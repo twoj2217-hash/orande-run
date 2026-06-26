@@ -20,7 +20,7 @@ export function KeycapKeyringVisual({ className, priority = false }: KeycapKeyri
         <button
           type="button"
           className={cn(
-            "group block w-full overflow-hidden rounded-lg border border-orange-100 bg-white/80",
+            "interactive-card group block w-full overflow-hidden rounded-lg border border-orange-100 bg-white/80",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2",
             className
           )}
@@ -32,7 +32,7 @@ export function KeycapKeyringVisual({ className, priority = false }: KeycapKeyri
             width={keycapKeyringPoster.width}
             height={keycapKeyringPoster.height}
             priority={priority}
-            className="h-auto w-full object-contain transition-transform duration-200 group-hover:scale-[1.01]"
+            className="h-auto w-full object-contain transition-transform duration-200 motion-safe:group-hover:scale-[1.01]"
           />
         </button>
       </DialogTrigger>

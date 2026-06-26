@@ -3,14 +3,15 @@
 import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
 
-// 폼 6단계 — IntersectionObserver로 현재 단계 감지
-export const APPLY_STEPS = ["코스", "지역", "계획", "정보", "동의", "입금"] as const
+// 폼 7단계 — IntersectionObserver로 현재 단계 감지
+export const APPLY_STEPS = ["코스", "지역", "계획", "정보", "발송지", "동의", "입금"] as const
 
 export const APPLY_STEP_IDS = [
   "step-tier",
   "step-location",
   "step-schedule",
   "step-info",
+  "step-shipping",
   "step-consent",
   "step-payment"
 ] as const

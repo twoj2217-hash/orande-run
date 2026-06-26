@@ -16,6 +16,29 @@
   .text-ko-balance {
     @apply text-ko text-balance;
   }
+
+  /* 1단계 인터랙션: 카드 hover lift (모션 감소 시 비활성) */
+  .interactive-card {
+    @apply transition-[transform,box-shadow] duration-200 ease-out motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md motion-safe:active:translate-y-0 motion-safe:active:shadow-sm;
+  }
+
+  /* 선택 칩: 색상 전환 + 선택 시 살짝 확대 */
+  .interactive-chip {
+    @apply transition-[color,background-color,border-color,transform,box-shadow] duration-150 ease-out motion-safe:active:scale-[0.98];
+  }
+
+  .interactive-chip-selected {
+    @apply motion-safe:scale-[1.02] shadow-sm;
+  }
+
+  /* 2단계: 복사 성공 버튼 피드백 */
+  .copy-success-flash {
+    @apply bg-green-50 text-green-700 border-green-300 motion-safe:scale-[1.02];
+  }
+
+  .copy-error-flash {
+    @apply bg-red-50 text-red-700 border-red-300;
+  }
 }
 
 @layer base {

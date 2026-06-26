@@ -1,6 +1,7 @@
 "use client"
 
 import { ApplyFormStep, ApplyStickySubmit } from "@/components/apply-form-step"
+import { AddressSearchInput } from "@/components/address-search-input"
 import { ApplyProgress } from "@/components/apply-progress"
 import { ApplySuccessModal } from "@/components/apply-success-modal"
 import { ParticipationPolicyNotes } from "@/components/participation-policy-notes"
@@ -18,7 +19,7 @@ import {
   formatLocationLabel,
   getRecruitmentPeriodLabel,
   getRecruitmentStatus,
-  getRunStartLabel,
+  getRunPeriodLabel,
   locationCities,
   outsideRegionCopy,
   paymentInfo,
@@ -27,10 +28,12 @@ import {
   runningPreferenceCopy,
   runningTimeSuggestions,
   runTiers,
+  shippingAddressCopy,
   type RunTierId,
   type RunningDay
 } from "@/lib/event-config"
 import { cn } from "@/lib/utils"
+import { formatShippingAddressLabel } from "@/lib/shipping-address"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
@@ -52,6 +55,9 @@ type FormErrors = {
   name?: string
   phone?: string
   email?: string
+  shippingZipcode?: string
+  shippingAddress?: string
+  shippingAddressDetail?: string
   privacyConsent?: string
 }
 
@@ -79,6 +85,9 @@ export function ApplyPageContent() {
   const [runningTimePreference, setRunningTimePreference] = useState("")
   const [privacyConsent, setPrivacyConsent] = useState(false)
   const [form, setForm] = useState<FormState>({ name: "", phone: "", email: "" })
+  const [shippingZipcode, setShippingZipcode] = useState("")
+  const [shippingAddress, setShippingAddress] = useState("")
+  const [shippingAddressDetail, setShippingAddressDetail] = useState("")
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -98,6 +107,15 @@ export function ApplyPageContent() {
     if (!district) return null
     return formatLocationLabel("daejeon", district)
   }, [cityId, district, outsideRegion])
+
+  const shippingPreview = useMemo(() => {
+    if (!shippingZipcode || !shippingAddress) return null
+    return formatShippingAddressLabel({
+      zipcode: shippingZipcode,
+      address: shippingAddress,
+      addressDetail: shippingAddressDetail
+    })
+  }, [shippingAddress, shippingAddressDetail, shippingZipcode])
 
   // 새로고침 시 sessionStorage에서 완료 모달 복원
   useEffect(() => {
@@ -135,6 +153,17 @@ export function ApplyPageContent() {
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       next.email = "올바른 이메일을 입력해 주세요."
     }
+    if (!/^\d{5}$/.test(shippingZipcode)) {
+      next.shippingZipcode = "주소 검색 버튼으로 우편번호를 입력해 주세요."
+    }
+    if (!shippingAddress.trim()) {
+      next.shippingAddress = "주소 검색으로 기본 주소를 입력해 주세요."
+    }
+    if (!shippingAddressDetail.trim()) {
+      next.shippingAddressDetail = "상세 주소를 입력해 주세요."
+    } else if (shippingAddressDetail.trim().length > 100) {
+      next.shippingAddressDetail = "상세 주소는 100자 이하로 입력해 주세요."
+    }
     if (!privacyConsent) next.privacyConsent = "개인정보 수집·이용에 동의해 주세요."
     return next
   }
@@ -171,6 +200,9 @@ export function ApplyPageContent() {
           outsideRegion: cityId === "outside" ? outsideRegion.trim() : undefined,
           runningDays,
           runningTimePreference: runningTimePreference.trim(),
+          shippingZipcode,
+          shippingAddress: shippingAddress.trim(),
+          shippingAddressDetail: shippingAddressDetail.trim(),
           privacyConsent: true
         })
       })
@@ -205,6 +237,7 @@ export function ApplyPageContent() {
       ? [runningDays.join("·"), runningTimePreference.trim()].filter(Boolean).join(" / ")
       : null
   const infoSummary = form.name.trim() ? `${form.name} · ${form.phone.slice(-4)}` : null
+  const shippingSummary = shippingPreview
 
   const submitButton = (
     <Button
@@ -241,10 +274,10 @@ export function ApplyPageContent() {
 
         <h1 className="text-3xl md:text-4xl font-black text-foreground mb-2">오랜디런 참가 신청</h1>
         <p className="text-muted-foreground mb-4">
-          모집 {getRecruitmentPeriodLabel()} · 시작 {getRunStartLabel()}
+          모집 {getRecruitmentPeriodLabel()} · 참여 {getRunPeriodLabel()}
         </p>
 
-        <RecruitmentBanner className="mb-6" />
+        <RecruitmentBanner className="mb-6" context="apply" />
 
         {isRecruitmentClosed && (
           <div className="rounded-xl border border-red-200 bg-red-50 text-red-800 px-4 py-3 text-sm mb-6" role="alert">
@@ -275,9 +308,9 @@ export function ApplyPageContent() {
                       setErrors((prev) => ({ ...prev, tier: undefined }))
                     }}
                     className={cn(
-                      "rounded-2xl border p-5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 min-h-[44px]",
+                      "interactive-card interactive-chip rounded-2xl border p-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 min-h-[44px]",
                       isSelected
-                        ? "border-orange-500 bg-orange-50 ring-1 ring-orange-500"
+                        ? "interactive-chip-selected border-orange-500 bg-orange-50 ring-1 ring-orange-500"
                         : "border-orange-200 bg-white hover:border-orange-300"
                     )}
                     aria-pressed={isSelected}
@@ -330,9 +363,9 @@ export function ApplyPageContent() {
                         }))
                       }}
                       className={cn(
-                        "h-11 px-5 rounded-[10px] border font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500",
+                        "interactive-chip h-11 px-5 rounded-[10px] border font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500",
                         cityId === city.id
-                          ? "border-orange-500 bg-orange-50 text-orange-700"
+                          ? "interactive-chip-selected border-orange-500 bg-orange-50 text-orange-700"
                           : "border-orange-200 bg-white hover:border-orange-300"
                       )}
                       aria-pressed={cityId === city.id}
@@ -363,9 +396,9 @@ export function ApplyPageContent() {
                           setErrors((prev) => ({ ...prev, district: undefined }))
                         }}
                         className={cn(
-                          "h-11 px-4 rounded-[10px] border font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500",
+                          "interactive-chip h-11 px-4 rounded-[10px] border font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500",
                           district === gu
-                            ? "border-orange-500 bg-orange-50 text-orange-700"
+                            ? "interactive-chip-selected border-orange-500 bg-orange-50 text-orange-700"
                             : "border-orange-200 bg-white hover:border-orange-300"
                         )}
                         aria-pressed={district === gu}
@@ -437,9 +470,9 @@ export function ApplyPageContent() {
                       type="button"
                       onClick={() => toggleRunningDay(day)}
                       className={cn(
-                        "h-11 min-w-[44px] px-4 rounded-[10px] border font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500",
+                        "interactive-chip h-11 min-w-[44px] px-4 rounded-[10px] border font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500",
                         runningDays.includes(day)
-                          ? "border-orange-500 bg-orange-50 text-orange-700"
+                          ? "interactive-chip-selected border-orange-500 bg-orange-50 text-orange-700"
                           : "border-orange-200 bg-white hover:border-orange-300"
                       )}
                       aria-pressed={runningDays.includes(day)}
@@ -470,7 +503,7 @@ export function ApplyPageContent() {
                       key={suggestion}
                       type="button"
                       onClick={() => appendTimeSuggestion(suggestion)}
-                      className="h-9 px-3 rounded-[10px] border border-dashed border-orange-200 bg-orange-50/50 text-sm text-orange-700 hover:border-orange-300 hover:bg-orange-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                      className="interactive-chip h-9 px-3 rounded-[10px] border border-dashed border-orange-200 bg-orange-50/50 text-sm text-orange-700 hover:border-orange-300 hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                       aria-label={`참고: ${suggestion} — 입력란에 추가`}
                     >
                       {suggestion}
@@ -552,9 +585,49 @@ export function ApplyPageContent() {
             </div>
           </ApplyFormStep>
 
+          <ApplyFormStep
+            id="step-shipping"
+            headingId="shipping-heading"
+            title={shippingAddressCopy.sectionTitle}
+            stepNumber={5}
+            summary={shippingSummary}
+            isComplete={Boolean(shippingZipcode && shippingAddress && shippingAddressDetail.trim())}
+          >
+            <p className="text-sm text-muted-foreground mb-4 text-ko-balance">{shippingAddressCopy.sectionHint}</p>
+            <div className="rounded-2xl border border-orange-200 bg-white p-6 space-y-4">
+              <AddressSearchInput
+                zipcode={shippingZipcode}
+                address={shippingAddress}
+                addressDetail={shippingAddressDetail}
+                onZipcodeChange={(value) => {
+                  setShippingZipcode(value)
+                  setErrors((prev) => ({ ...prev, shippingZipcode: undefined, shippingAddress: undefined }))
+                }}
+                onAddressChange={(value) => {
+                  setShippingAddress(value)
+                  setErrors((prev) => ({ ...prev, shippingAddress: undefined }))
+                }}
+                onAddressDetailChange={(value) => {
+                  setShippingAddressDetail(value)
+                  setErrors((prev) => ({ ...prev, shippingAddressDetail: undefined }))
+                }}
+                zipcodeError={errors.shippingZipcode}
+                addressError={errors.shippingAddress}
+                addressDetailError={errors.shippingAddressDetail}
+                disabled={isRecruitmentClosed}
+              />
+
+              {shippingPreview && (
+                <p className="text-sm text-muted-foreground">
+                  발송지: <strong className="text-foreground">{shippingPreview}</strong>
+                </p>
+              )}
+            </div>
+          </ApplyFormStep>
+
           <section id="step-consent" aria-labelledby="consent-heading">
             <h2 id="consent-heading" className="text-xl font-black text-foreground mb-4">
-              5. 동의
+              6. 동의
             </h2>
             <div className="rounded-2xl border border-orange-200 bg-white p-6 space-y-4">
               <label className="flex items-start gap-3 cursor-pointer min-h-[44px]">
@@ -583,10 +656,10 @@ export function ApplyPageContent() {
 
           <ParticipationPolicyNotes className="bg-orange-50/40" />
 
-          {/* 6. 입금 안내 */}
+          {/* 7. 입금 안내 */}
           <section id="step-payment" aria-labelledby="payment-heading">
             <h2 id="payment-heading" className="text-xl font-black text-foreground mb-4">
-              6. 참가비 입금
+              7. 참가비 입금
             </h2>
             <div className="rounded-2xl border border-orange-200 bg-orange-50/50 p-6 text-sm text-muted-foreground">
               <p>

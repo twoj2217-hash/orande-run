@@ -15,7 +15,8 @@ import {
 import type { ApplySuccessPayload } from "@/lib/apply-success-storage"
 import { copyPaymentInfo } from "@/lib/copy-payment-info"
 import { paymentInfo } from "@/lib/event-config"
-import { CheckCircle2, Copy, Home, Loader2, Wallet } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Check, CheckCircle2, Copy, Home, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
@@ -51,6 +52,14 @@ export function ApplySuccessModal({ open, payload, onClose }: ApplySuccessModalP
       window.setTimeout(() => setCopyState("idle"), 2000)
     }
   }, [payload])
+
+  // 복사 버튼 공통 스타일 — 성공/실패 시 색상 피드백
+  const copyButtonClass = cn(
+    "mt-4 w-full font-semibold border transition-[color,background-color,border-color,transform] duration-200",
+    copyState === "copied" && "copy-success-flash",
+    copyState === "error" && "copy-error-flash",
+    copyState !== "copied" && copyState !== "error" && "bg-white hover:bg-orange-50 text-orange-700 border-orange-300"
+  )
 
   // payload 없이 본문을 렌더하면 payload.name 접근 시 TypeError 발생
   if (!payload) {
@@ -91,7 +100,7 @@ export function ApplySuccessModal({ open, payload, onClose }: ApplySuccessModalP
             type="button"
             onClick={handleCopy}
             disabled={copyState === "copying"}
-            className="mt-4 w-full bg-white hover:bg-orange-50 text-orange-700 border border-orange-300 font-semibold"
+            className={copyButtonClass}
           >
             {copyState === "copying" ? (
               <>
@@ -99,7 +108,10 @@ export function ApplySuccessModal({ open, payload, onClose }: ApplySuccessModalP
                 복사 중...
               </>
             ) : copyState === "copied" ? (
-              "복사됨"
+              <>
+                <Check className="w-4 h-4" aria-hidden />
+                복사됨
+              </>
             ) : copyState === "error" ? (
               "복사 실패 — 다시 시도해 주세요"
             ) : (
@@ -111,23 +123,23 @@ export function ApplySuccessModal({ open, payload, onClose }: ApplySuccessModalP
           </Button>
         </div>
 
-        <ParticipationPolicyNotes variant="compact" />
+        {/* 입금 외 안내는 기본 접기로 제공해 첫 화면 집중도를 높입니다. */}
+        <details className="rounded-2xl border border-orange-200 bg-white overflow-hidden group">
+          <summary className="px-5 py-4 cursor-pointer list-none font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-inset">
+            앞으로 진행 안내 (펼쳐보기)
+          </summary>
+          <div className="px-5 pb-5 space-y-4 border-t border-orange-100">
+            <ParticipationPolicyNotes variant="compact" />
 
-        {/* 앞으로 진행 방식 안내 (신청 완료 후에만 노출) */}
-        <ParticipantGuide variant="compact" />
+            {/* 앞으로 진행 방식 안내 (신청 완료 후에만 노출) */}
+            <ParticipantGuide variant="compact" />
 
-        {/* 챌린지 종료 후 참고용 완주 인증 안내 */}
-        <VerificationGuide variant="compact" />
+            {/* 챌린지 종료 후 참고용 완주 인증 안내 */}
+            <VerificationGuide variant="compact" />
+          </div>
+        </details>
 
         <DialogFooter className="flex-col gap-2 sm:flex-col">
-          <Button
-            type="button"
-            onClick={handleCopy}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold"
-          >
-            <Wallet className="w-4 h-4" aria-hidden />
-            입금 정보 복사
-          </Button>
           <Button
             type="button"
             variant="outline"

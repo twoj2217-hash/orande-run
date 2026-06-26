@@ -7,6 +7,7 @@ import {
   type LocationCityId,
   type RunTierId
 } from "@/lib/event-config"
+import { formatShippingAddressLabel } from "@/lib/shipping-address"
 import { z } from "zod"
 
 const runningDaySchema = z.enum(runningDayOptions)
@@ -46,6 +47,20 @@ export const applyRequestSchema = z
       .trim()
       .optional()
       .transform((v) => v || ""),
+    // 키캡키링 발송지 — 우편번호 검색 + 상세주소 직접 입력
+    shippingZipcode: z
+      .string()
+      .trim()
+      .min(1, "발송지 우편번호를 입력해 주세요.")
+      .refine((value) => /^\d{5}$/.test(value), {
+        message: "주소 검색 버튼으로 우편번호를 입력해 주세요."
+      }),
+    shippingAddress: z.string().trim().min(1, "발송지 기본 주소를 입력해 주세요."),
+    shippingAddressDetail: z
+      .string()
+      .trim()
+      .min(1, "상세 주소를 입력해 주세요.")
+      .max(100, "상세 주소는 100자 이하로 입력해 주세요."),
     privacyConsent: z.literal(true, {
       errorMap: () => ({ message: "개인정보 수집·이용에 동의해 주세요." })
     })
@@ -97,11 +112,18 @@ export const applyRequestSchema = z
       data.cityId === "outside" ? data.outsideRegion : undefined
     )
 
+    const shippingAddressLabel = formatShippingAddressLabel({
+      zipcode: data.shippingZipcode,
+      address: data.shippingAddress,
+      addressDetail: data.shippingAddressDetail
+    })
+
     return {
       ...data,
       locationLabel,
       runningDaysLabel: data.runningDays.length > 0 ? data.runningDays.join(", ") : "(미입력)",
-      runningTimePreferenceLabel: data.runningTimePreference || "(미입력)"
+      runningTimePreferenceLabel: data.runningTimePreference || "(미입력)",
+      shippingAddressLabel
     }
   })
 

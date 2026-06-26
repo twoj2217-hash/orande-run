@@ -5,11 +5,9 @@ import { Timeline } from "@/components/ui/timeline"
 import CTASection from "@/components/cta-section"
 import { ParticipationPolicyNotes } from "@/components/participation-policy-notes"
 import { RecruitmentBanner } from "@/components/recruitment-banner"
-import { VerificationGuide } from "@/components/verification-guide"
 import {
-  eventSchedule,
   getRecruitmentPeriodLabel,
-  getRunStartLabel,
+  getRunPeriodLabel,
   participationSteps,
   rewardDeliveryNote,
   runTiers
@@ -110,9 +108,7 @@ export default function Page() {
             </div>
             <div className="rounded-2xl border border-orange-200 bg-white p-5">
               <p className="text-sm text-orange-600 font-semibold mb-1">참여 기간</p>
-              <p className="text-xl font-black text-foreground">
-                시작일 {getRunStartLabel()} · {eventSchedule.participationWeeks}주 챌린지
-              </p>
+              <p className="text-xl font-black text-foreground">{getRunPeriodLabel()}</p>
             </div>
           </div>
 
@@ -126,12 +122,12 @@ export default function Page() {
           </div>
 
           {/* 모바일: 가로 스크롤 / 데스크톱: 3열 (70km 추천 강조) */}
-          <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 mb-10 overflow-x-auto snap-x snap-mandatory pb-2 md:pb-0 md:overflow-visible -mx-6 px-6 md:mx-0 md:px-0">
+          <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 mb-6 overflow-x-auto snap-x snap-mandatory pb-2 md:pb-0 md:overflow-visible -mx-6 px-6 md:mx-0 md:px-0">
             {runTiers.map((tier) => (
               <article
                 key={tier.id}
                 className={cn(
-                  "flex-shrink-0 w-[85vw] sm:w-[320px] md:w-auto snap-center rounded-2xl border bg-white p-6 shadow-sm",
+                  "interactive-card flex-shrink-0 w-[85vw] sm:w-[320px] md:w-auto snap-center rounded-2xl border bg-white p-6 shadow-sm",
                   tier.recommended
                     ? "border-orange-400 ring-2 ring-orange-400/40 md:scale-[1.03] md:z-10"
                     : "border-orange-200"
@@ -151,8 +147,6 @@ export default function Page() {
                 </div>
                 <h3 className="text-3xl font-black text-foreground mb-2">{tier.label}</h3>
                 <p className="text-xl font-bold text-orange-600 mb-4">{feeFormatter.format(tier.fee)}원</p>
-
-                <p className="text-xs text-muted-foreground mb-3">{rewardDeliveryNote}</p>
                 <Link
                   href={`/apply?tier=${tier.id}`}
                   className="inline-flex items-center justify-center w-full h-11 rounded-[10px] border border-orange-300 bg-white text-orange-700 font-semibold text-sm transition-colors hover:border-orange-400 hover:bg-orange-50"
@@ -162,6 +156,10 @@ export default function Page() {
               </article>
             ))}
           </div>
+          {/* 발송 안내는 코스 카드별 중복 대신 섹션에서 한 번만 표시합니다. */}
+          <p className="text-xs text-muted-foreground text-center mb-10 max-w-4xl mx-auto">
+            {rewardDeliveryNote}
+          </p>
 
           <div className="rounded-2xl border border-orange-200 bg-white p-7 max-w-4xl mx-auto">
             <h3 className="text-2xl font-black text-foreground mb-4">참여 4단계</h3>
@@ -178,10 +176,6 @@ export default function Page() {
           </div>
 
           <ParticipationPolicyNotes className="max-w-4xl mx-auto mt-6" />
-
-          <div className="mt-8 max-w-4xl mx-auto">
-            <VerificationGuide />
-          </div>
         </div>
       </section>
 

@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "유효하지 않은 코스입니다." }, { status: 400 })
   }
 
-  const sheetsResult = await postToGoogleSheetsWebhook(webhookUrl, {
+  const webhookPayload = {
     secret: webhookSecret,
     submittedAt: new Date().toISOString(),
     name: data.name,
@@ -49,8 +49,24 @@ export async function POST(request: Request) {
     locationLabel: data.locationLabel,
     runningDaysLabel: data.runningDaysLabel,
     runningTimePreference: data.runningTimePreferenceLabel,
+    shippingZipcode: data.shippingZipcode,
+    shippingAddress: data.shippingAddress,
+    shippingAddressDetail: data.shippingAddressDetail,
+    shippingAddressLabel: data.shippingAddressLabel,
     privacyConsent: "Y"
-  })
+  }
+
+  // 개발 환경에서 시트 전송 payload 확인용
+  if (process.env.NODE_ENV === "development") {
+    console.info("[apply] sheets payload shipping:", {
+      shippingZipcode: webhookPayload.shippingZipcode,
+      shippingAddress: webhookPayload.shippingAddress,
+      shippingAddressDetail: webhookPayload.shippingAddressDetail,
+      shippingAddressLabel: webhookPayload.shippingAddressLabel
+    })
+  }
+
+  const sheetsResult = await postToGoogleSheetsWebhook(webhookUrl, webhookPayload)
 
   if (!sheetsResult.ok) {
     console.error("Google Sheets webhook failed:", sheetsResult)
@@ -61,6 +77,17 @@ export async function POST(request: Request) {
           ok: false,
           error:
             "시트 연동 시크릿이 일치하지 않습니다. Apps Script의 WEBHOOK_SECRET과 .env.local을 확인해 주세요."
+        },
+        { status: 502 }
+      )
+    }
+
+    if (sheetsResult.error === "webapp_dev_url") {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "GOOGLE_SHEETS_WEBHOOK_URL 이 /dev 로 끝납니다. 배포 관리에서 /exec URL 로 바꿔 주세요."
         },
         { status: 502 }
       )

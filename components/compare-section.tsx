@@ -116,17 +116,17 @@ export default function CompareSection({ minFee, maxFee }: CompareSectionProps) 
               {compareRows.map((row) => {
                 const Icon = row.icon
                 return (
-                  <tr key={row.id} className="border-t border-orange-100">
-                    <td className="p-4 font-semibold text-foreground text-ko text-center align-middle">
+                  <tr key={row.id} className="group border-t border-orange-100 transition-colors hover:bg-orange-50/40">
+                    <td className="p-4 font-semibold text-foreground text-ko text-center align-middle transition-colors group-hover:bg-orange-50/60">
                       <span className="flex items-center justify-center gap-2">
                         <Icon className="w-4 h-4 text-orange-500 shrink-0" aria-hidden />
                         {row.label}
                       </span>
                     </td>
-                    <td className="p-4 bg-muted/30 text-muted-foreground/70 text-ko text-center align-middle">
+                    <td className="p-4 bg-muted/30 text-muted-foreground/70 text-ko text-center align-middle transition-colors group-hover:bg-muted/40">
                       {row.general}
                     </td>
-                    <td className="p-4 bg-orange-50 font-semibold text-foreground text-ko text-center align-middle shadow-[inset_0_0_0_2px_rgba(251,146,60,0.25)]">
+                    <td className="p-4 bg-orange-50 font-semibold text-foreground text-ko text-center align-middle shadow-[inset_0_0_0_2px_rgba(251,146,60,0.25)] transition-colors group-hover:bg-orange-100/80">
                       {row.renderOranDe(feeContext)}
                     </td>
                   </tr>
@@ -143,7 +143,7 @@ export default function CompareSection({ minFee, maxFee }: CompareSectionProps) 
             return (
               <article
                 key={row.id}
-                className="rounded-2xl border border-orange-200 bg-white overflow-hidden shadow-sm"
+                className="rounded-2xl border border-orange-200 bg-white overflow-hidden shadow-sm transition-shadow motion-safe:active:shadow-md"
               >
                 <header className="flex items-center justify-center gap-2 p-4 border-b border-orange-100 bg-white">
                   <Icon className="w-5 h-5 text-orange-500 shrink-0" aria-hidden />
@@ -155,7 +155,7 @@ export default function CompareSection({ minFee, maxFee }: CompareSectionProps) 
                   <p className="text-sm text-muted-foreground/80 text-ko-balance">{row.general}</p>
                 </div>
 
-                <div className="p-4 bg-orange-50 text-center border-t border-orange-200">
+                <div className="p-4 bg-orange-50 text-center border-t border-orange-200 transition-colors motion-safe:active:bg-orange-100">
                   <p className="text-xs font-black text-orange-700 mb-2">OranDe Run</p>
                   <p className="text-sm font-semibold text-foreground text-ko-balance">
                     {row.renderOranDe(feeContext)}

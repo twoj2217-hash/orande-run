@@ -26,6 +26,7 @@ export function VerificationGuide({ variant = "default", className = "" }: Verif
           </li>
         </ul>
         <p className="text-xs text-muted-foreground mt-3">마감: {verificationConfig.deadlineNote}</p>
+        <p className="text-xs text-muted-foreground mt-2">{verificationConfig.graceNote}</p>
       </div>
     )
   }
@@ -67,6 +68,10 @@ export function VerificationGuide({ variant = "default", className = "" }: Verif
         <p className="text-xs text-muted-foreground">
           비공개 계정은 방법 B를 권장합니다. 스토리만 올린 경우, 운영진이 확인할 수 있도록 메일로 스크린샷을 추가로
           보내 주세요.
+        </p>
+
+        <p className="text-sm text-muted-foreground rounded-xl border border-orange-100 bg-orange-50/40 p-4">
+          {verificationConfig.graceNote}
         </p>
       </div>
     </div>

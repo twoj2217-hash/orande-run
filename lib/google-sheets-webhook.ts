@@ -8,32 +8,12 @@ export async function postToGoogleSheetsWebhook(
   url: string,
   payload: Record<string, unknown>
 ): Promise<GoogleSheetsWebhookResult> {
-  const body = JSON.stringify(payload)
+  // /dev URL은 로그인한 개발자 브라우저 테스트용 — API 서버 POST는 /exec 만 동작
+  if (url.includes("/dev")) {
+    return { ok: false, error: "webapp_dev_url" }
+  }
 
-  // #region agent log
-  fetch("http://127.0.0.1:7475/ingest/eae9ac5d-46fd-4526-8a41-f537c0585955", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "587d6a" },
-    body: JSON.stringify({
-      sessionId: "587d6a",
-      runId: "pre-fix",
-      hypothesisId: "H2",
-      location: "lib/google-sheets-webhook.ts:entry",
-      message: "webhook request start",
-      data: {
-        urlHost: (() => {
-          try {
-            const u = new URL(url)
-            return { host: u.host, pathnameEndsWithExec: u.pathname.endsWith("/exec") }
-          } catch {
-            return { invalidUrl: true }
-          }
-        })()
-      },
-      timestamp: Date.now()
-    })
-  }).catch(() => {})
-  // #endregion
+  const body = JSON.stringify(payload)
 
   // GAS /exec URL에 POST 1회 — redirect:follow가 302를 따라가며 doPost까지 도달함
   const response = await fetch(url, {
@@ -43,56 +23,10 @@ export async function postToGoogleSheetsWebhook(
     redirect: "follow"
   })
 
-  const firstStatus = response.status
-  const redirectLocation: string | null = null
-  const didSecondPost = false
-
   const text = await response.text()
-
-  // #region agent log
-  fetch("http://127.0.0.1:7475/ingest/eae9ac5d-46fd-4526-8a41-f537c0585955", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "587d6a" },
-    body: JSON.stringify({
-      sessionId: "587d6a",
-      runId: "pre-fix",
-      hypothesisId: "H1,H3,H4,H5",
-      location: "lib/google-sheets-webhook.ts:after-final-response",
-      message: "final webhook response",
-      data: {
-        firstStatus,
-        didSecondPost,
-        finalStatus: response.status,
-        isHtml: text.trimStart().startsWith("<!DOCTYPE") || text.trimStart().startsWith("<html"),
-        bodyPreview: text.slice(0, 80)
-      },
-      timestamp: Date.now()
-    })
-  }).catch(() => {})
-  // #endregion
 
   try {
     const parsed = JSON.parse(text) as { ok?: boolean; error?: string }
-
-    // #region agent log
-    fetch("http://127.0.0.1:7475/ingest/eae9ac5d-46fd-4526-8a41-f537c0585955", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "587d6a" },
-      body: JSON.stringify({
-        sessionId: "587d6a",
-        runId: "post-fix",
-        hypothesisId: "H1,H5",
-        location: "lib/google-sheets-webhook.ts:parsed-json",
-        message: "parsed GAS JSON response",
-        data: {
-          finalStatus: response.status,
-          parsedOk: parsed.ok,
-          parsedError: parsed.error ?? null
-        },
-        timestamp: Date.now()
-      })
-    }).catch(() => {})
-    // #endregion
 
     if (!parsed.ok && parsed.error === "unauthorized") {
       return { ok: false, error: "secret_mismatch" }

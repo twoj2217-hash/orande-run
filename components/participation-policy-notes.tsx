@@ -33,7 +33,14 @@ export function ParticipationPolicyNotes({ className, variant = "default" }: Par
       </ul>
       <p className={cn("mt-3 text-muted-foreground border-t border-orange-100 pt-3", isCompact && "mt-2 pt-2")}>
         문의: {supportContact.label}{" "}
-        <strong className="text-foreground font-semibold">{supportContact.kakaoId}</strong>
+        <a
+          href={supportContact.openChatUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-orange-600 underline underline-offset-2 hover:text-orange-700"
+        >
+          {supportContact.displayName}
+        </a>
       </p>
     </aside>
   )
