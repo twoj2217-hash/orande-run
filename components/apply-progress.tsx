@@ -88,7 +88,7 @@ export function ApplyProgress({ className }: ApplyProgressProps) {
   return (
     <div
       className={cn(
-        "sticky top-0 z-20 -mx-6 px-6 py-3 mb-6 bg-gradient-to-b from-orange-50 via-orange-50/95 to-transparent backdrop-blur-sm",
+        "sticky top-0 z-20 -mx-4 px-4 py-3 mb-6 bg-gradient-to-b from-orange-50 via-orange-50/95 to-transparent backdrop-blur-sm sm:-mx-6 sm:px-6",
         className
       )}
     >

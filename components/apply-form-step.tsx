@@ -77,10 +77,10 @@ export function ApplyFormStep({
             setUserOpened(details.open)
           }}
           className={cn(
-            "overflow-hidden group",
+            "group",
             shouldCollapse
-              ? "rounded-2xl border border-orange-200 bg-white"
-              : "border-transparent bg-transparent"
+              ? "overflow-hidden rounded-2xl border border-orange-200 bg-white"
+              : "overflow-visible border-transparent bg-transparent"
           )}
         >
           <summary

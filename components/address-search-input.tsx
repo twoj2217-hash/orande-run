@@ -187,7 +187,7 @@ export function AddressSearchInput({
         <label htmlFor="shipping-zipcode" className="block text-sm font-semibold text-foreground mb-1">
           우편번호 <span className="text-red-500">*</span>
         </label>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <input
             id="shipping-zipcode"
             type="text"
@@ -195,7 +195,8 @@ export function AddressSearchInput({
             value={zipcode}
             readOnly
             className={cn(
-              "flex-1 h-11 rounded-[10px] border border-orange-200 px-3 bg-orange-50/40 text-foreground",
+              // sm 이상 가로 배치에서도 버튼이 밀리지 않게 수축을 허용합니다.
+              "min-w-0 flex-1 h-11 rounded-[10px] border border-orange-200 px-3 bg-orange-50/40 text-base text-foreground",
               zipcodeError && "border-red-400"
             )}
             placeholder="주소 검색 시 자동 입력"
@@ -205,7 +206,7 @@ export function AddressSearchInput({
             type="button"
             onClick={openPostcodeSearch}
             disabled={disabled || isLoadingScript}
-            className="h-11 shrink-0 px-4 rounded-[10px] border border-orange-500 bg-orange-500 text-white font-semibold inline-flex items-center gap-1.5 hover:bg-orange-600 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+            className="h-11 w-full shrink-0 justify-center px-4 rounded-[10px] border border-orange-500 bg-orange-500 text-white font-semibold inline-flex items-center gap-1.5 hover:bg-orange-600 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:w-auto"
           >
             <Search className="w-4 h-4" aria-hidden />
             {isLoadingScript ? "불러오는 중..." : "주소 검색"}
@@ -233,7 +234,7 @@ export function AddressSearchInput({
           value={address}
           readOnly
           className={cn(
-            "w-full h-11 rounded-[10px] border border-orange-200 px-3 bg-orange-50/40 text-foreground",
+            "w-full h-11 rounded-[10px] border border-orange-200 px-3 bg-orange-50/40 text-base text-foreground",
             addressError && "border-red-400"
           )}
           placeholder="주소 검색 후 자동 입력됩니다"
@@ -257,7 +258,7 @@ export function AddressSearchInput({
           onChange={(event) => onAddressDetailChange(event.target.value)}
           disabled={disabled}
           className={cn(
-            "w-full h-11 rounded-[10px] border border-orange-200 px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500",
+            "w-full h-11 rounded-[10px] border border-orange-200 px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500",
             addressDetailError && "border-red-400"
           )}
           placeholder="동·호수, 공동현관 비밀번호 등"

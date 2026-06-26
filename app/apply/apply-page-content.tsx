@@ -32,6 +32,7 @@ import {
   type RunTierId,
   type RunningDay
 } from "@/lib/event-config"
+import { formatPhoneInput, isValidPhone, normalizePhone } from "@/lib/phone-format"
 import { cn } from "@/lib/utils"
 import { formatShippingAddressLabel } from "@/lib/shipping-address"
 import { ArrowLeft, Loader2 } from "lucide-react"
@@ -151,7 +152,7 @@ export function ApplyPageContent() {
       next.outsideRegion = "거주 지역은 50자 이하로 입력해 주세요."
     }
     if (!form.name.trim()) next.name = "이름을 입력해 주세요."
-    if (!/^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$/.test(form.phone.replace(/\s/g, ""))) {
+    if (!isValidPhone(form.phone)) {
       next.phone = "올바른 휴대폰 번호를 입력해 주세요."
     }
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
@@ -196,7 +197,8 @@ export function ApplyPageContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name.trim(),
-          phone: form.phone.trim(),
+          // API 전송 전 하이픈 포함 형태로 정규화합니다.
+          phone: normalizePhone(form.phone),
           email: form.email.trim(),
           tierId: selectedTierId,
           cityId,
@@ -240,7 +242,8 @@ export function ApplyPageContent() {
     runningDays.length > 0 || runningTimePreference.trim()
       ? [runningDays.join("·"), runningTimePreference.trim()].filter(Boolean).join(" / ")
       : null
-  const infoSummary = form.name.trim() ? `${form.name} · ${form.phone.slice(-4)}` : null
+  const phoneLast4 = normalizePhone(form.phone).replace(/\D/g, "").slice(-4)
+  const infoSummary = form.name.trim() ? [form.name.trim(), phoneLast4].filter(Boolean).join(" · ") : null
   const shippingSummary = shippingPreview
 
   const submitButton = (
@@ -267,7 +270,7 @@ export function ApplyPageContent() {
     <div className="min-h-screen bg-orange-50/80 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-10">
       <ApplySuccessModal open={showSuccessModal} payload={successPayload} onClose={handleModalClose} />
 
-      <div className="container mx-auto px-6 py-6 md:py-10 max-w-2xl">
+      <div className="container mx-auto max-w-2xl px-4 py-6 sm:px-6 md:py-10">
         <Link
           href="/#join"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-orange-600 mb-6"
@@ -276,7 +279,7 @@ export function ApplyPageContent() {
           랜딩으로 돌아가기
         </Link>
 
-        <h1 className="text-3xl md:text-4xl font-black text-foreground mb-2">오랜디런 참가 신청</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-foreground mb-2">오랜디런 참가 신청</h1>
         <p className="text-muted-foreground mb-4">
           모집 {getRecruitmentPeriodLabel()} · 참여 {getRunPeriodLabel()}
         </p>
@@ -342,7 +345,7 @@ export function ApplyPageContent() {
             summary={locationSummary}
             isComplete={!!locationPreview}
           >
-            <div className="rounded-2xl border border-orange-200 bg-white p-6 space-y-5">
+            <div className="rounded-2xl border border-orange-200 bg-white p-4 sm:p-6 space-y-5">
               <fieldset>
                 <legend className="text-sm font-semibold text-foreground mb-3">
                   지역 선택 <span className="text-red-500">*</span>
@@ -431,7 +434,7 @@ export function ApplyPageContent() {
                       setOutsideRegion(e.target.value)
                       setErrors((prev) => ({ ...prev, outsideRegion: undefined }))
                     }}
-                    className="w-full h-11 rounded-[10px] border border-orange-200 px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                    className="w-full h-11 rounded-[10px] border border-orange-200 px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                     placeholder={outsideRegionCopy.placeholder}
                     maxLength={50}
                     autoComplete="address-level2"
@@ -462,7 +465,7 @@ export function ApplyPageContent() {
             collapseWhenComplete={false}
           >
             <p className="text-sm text-muted-foreground mb-4 text-ko-balance">{runningPreferenceCopy.sectionHint}</p>
-            <div className="rounded-2xl border border-orange-200 bg-white p-6 space-y-5">
+            <div className="rounded-2xl border border-orange-200 bg-white p-4 sm:p-6 space-y-5">
               <fieldset>
                 <legend className="text-sm font-semibold text-foreground mb-3">
                   {runningPreferenceCopy.daysLabel}{" "}
@@ -498,7 +501,7 @@ export function ApplyPageContent() {
                   type="text"
                   value={runningTimePreference}
                   onChange={(e) => setRunningTimePreference(e.target.value)}
-                  className="w-full h-11 rounded-[10px] border border-orange-200 px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                  className="w-full h-11 rounded-[10px] border border-orange-200 px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                   placeholder={runningPreferenceCopy.timePlaceholder}
                 />
                 <p className="text-xs text-muted-foreground mt-2">{runningPreferenceCopy.suggestionsLabel}</p>
@@ -525,9 +528,10 @@ export function ApplyPageContent() {
             title="참가자 정보"
             stepNumber={4}
             summary={infoSummary}
-            isComplete={!!form.name.trim() && /^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$/.test(form.phone.replace(/\s/g, ""))}
+            isComplete={!!form.name.trim() && isValidPhone(form.phone)}
+            collapseWhenComplete={false}
           >
-            <div className="space-y-4 rounded-2xl border border-orange-200 bg-white p-6">
+            <div className="space-y-4 rounded-2xl border border-orange-200 bg-white p-4 sm:p-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-semibold text-foreground mb-1">
                   이름 <span className="text-red-500">*</span>
@@ -537,7 +541,7 @@ export function ApplyPageContent() {
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                  className="w-full h-11 rounded-[10px] border border-orange-200 px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                  className="w-full h-11 rounded-[10px] border border-orange-200 px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                   placeholder="홍길동"
                   autoComplete="name"
                 />
@@ -556,10 +560,13 @@ export function ApplyPageContent() {
                   id="phone"
                   type="tel"
                   value={form.phone}
-                  onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
-                  className="w-full h-11 rounded-[10px] border border-orange-200 px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                  // 숫자만 입력해도 자동으로 하이픈을 넣어 표시합니다.
+                  onChange={(e) => setForm((prev) => ({ ...prev, phone: formatPhoneInput(e.target.value) }))}
+                  className="w-full h-11 rounded-[10px] border border-orange-200 px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                   placeholder="010-1234-5678"
+                  inputMode="numeric"
                   autoComplete="tel"
+                  maxLength={13}
                 />
                 {errors.phone && (
                   <p className="text-sm text-red-600 mt-1" role="alert">
@@ -577,7 +584,7 @@ export function ApplyPageContent() {
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-                  className="w-full h-11 rounded-[10px] border border-orange-200 px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                  className="w-full h-11 rounded-[10px] border border-orange-200 px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                   placeholder="hello@example.com"
                   autoComplete="email"
                 />
@@ -600,7 +607,7 @@ export function ApplyPageContent() {
             collapseWhenComplete={false}
           >
             <p className="text-sm text-muted-foreground mb-4 text-ko-balance">{shippingAddressCopy.sectionHint}</p>
-            <div className="rounded-2xl border border-orange-200 bg-white p-6 space-y-4">
+            <div className="rounded-2xl border border-orange-200 bg-white p-4 sm:p-6 space-y-4">
               <AddressSearchInput
                 zipcode={shippingZipcode}
                 address={shippingAddress}
@@ -635,7 +642,7 @@ export function ApplyPageContent() {
             <h2 id="consent-heading" className="text-xl font-black text-foreground mb-4">
               6. 동의
             </h2>
-            <div className="rounded-2xl border border-orange-200 bg-white p-6 space-y-4">
+            <div className="rounded-2xl border border-orange-200 bg-white p-4 sm:p-6 space-y-4">
               <label className="flex items-start gap-3 cursor-pointer min-h-[44px]">
                 <input
                   type="checkbox"

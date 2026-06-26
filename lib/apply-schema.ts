@@ -7,6 +7,7 @@ import {
   type LocationCityId,
   type RunTierId
 } from "@/lib/event-config"
+import { isValidPhone, normalizePhone } from "@/lib/phone-format"
 import { formatShippingAddressLabel } from "@/lib/shipping-address"
 import { z } from "zod"
 
@@ -21,7 +22,9 @@ export const applyRequestSchema = z
     phone: z
       .string()
       .trim()
-      .refine((value) => /^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$/.test(value.replace(/\s/g, "")), {
+      // 서버 저장 전에도 휴대폰 포맷을 한 번 더 정규화합니다.
+      .transform((value) => normalizePhone(value))
+      .refine((value) => isValidPhone(value), {
         message: "올바른 휴대폰 번호를 입력해 주세요."
       }),
     email: z
