@@ -60,7 +60,13 @@ const compareRows: CompareRow[] = [
     general: "메달/티셔츠 중심",
     renderOranDe: () => (
       <>
-        어디서도 못 구하는 &apos;<CompareHighlight>한정판 키캡키링</CompareHighlight>&apos;
+        {/* 모바일: 브랜드명·리워드 문구 줄 나눔 / PC: 한 줄 유지 */}
+        <span className="inline-block text-ko-balance">
+          오랜디 런만의
+          <br className="md:hidden" aria-hidden />
+          {" "}
+          &quot;<CompareHighlight>키캡키링 증정</CompareHighlight>&quot;
+        </span>
       </>
     )
   },

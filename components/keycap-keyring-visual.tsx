@@ -20,7 +20,8 @@ export function KeycapKeyringVisual({ className, priority = false }: KeycapKeyri
         <button
           type="button"
           className={cn(
-            "interactive-card group block w-full overflow-hidden rounded-lg border border-orange-100 bg-white/80",
+            // 섹션 배경과 이어지게 — 테두리·흰 박스 없이 상품만 강조
+            "interactive-card group block w-full cursor-pointer bg-transparent",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2",
             className
           )}
@@ -32,7 +33,7 @@ export function KeycapKeyringVisual({ className, priority = false }: KeycapKeyri
             width={keycapKeyringPoster.width}
             height={keycapKeyringPoster.height}
             priority={priority}
-            className="h-auto w-full object-contain transition-transform duration-200 motion-safe:group-hover:scale-[1.01]"
+            className="h-auto w-full object-contain transition-[transform,filter] duration-200 motion-safe:group-hover:scale-[1.01] motion-safe:group-hover:drop-shadow-lg"
           />
         </button>
       </DialogTrigger>

@@ -3,14 +3,17 @@ import CompareSection from "@/components/compare-section"
 import { KeycapKeyringRewardSection } from "@/components/keycap-keyring-reward-section"
 import { Timeline } from "@/components/ui/timeline"
 import CTASection from "@/components/cta-section"
-import { ParticipationPolicyNotes } from "@/components/participation-policy-notes"
+import { ParticipationGuideSection } from "@/components/participation-guide-section"
 import { RecruitmentBanner } from "@/components/recruitment-banner"
 import {
   getRecruitmentPeriodLabel,
+  getRunEndLabel,
   getRunPeriodLabel,
-  participationSteps,
+  getRunStartLabel,
   rewardDeliveryNote,
-  runTiers
+  runTiers,
+  SCHEDULE_TBD_LABEL,
+  eventSchedule
 } from "@/lib/event-config"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -21,6 +24,10 @@ const feeFormatter = new Intl.NumberFormat("ko-KR")
 export default function Page() {
   const minFee = Math.min(...runTiers.map((tier) => tier.fee))
   const maxFee = Math.max(...runTiers.map((tier) => tier.fee))
+  const runPeriodLabel =
+    getRunStartLabel() === SCHEDULE_TBD_LABEL || getRunEndLabel() === SCHEDULE_TBD_LABEL
+      ? getRunPeriodLabel()
+      : `${getRunStartLabel()} ~ ${getRunEndLabel()} · ${eventSchedule.participationWeeks}주 챌린지`
 
   const timelineEntries = [
     {
@@ -44,7 +51,7 @@ export default function Page() {
       id: 3,
       image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-1FdGyjVpWQANGzsDWpoPIvF5SVI2za.png",
       alt: "랜선으로 함께 달리는 러너",
-      title: "혼자여도 외롭지 않게,\n랜선으로 달리기",
+      title: "외롭지 않게,\n랜선으로 달리기",
       description: "SNS 인증으로 서로 응원을 주고받으며, 이웃들과 함께 달려요.",
       layout: "left" as const
     }
@@ -72,8 +79,8 @@ export default function Page() {
               >
                 왜 버추얼 런일까?
               </h2>
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto text-ko-balance">
-                비대면 마라톤이라 더운 여름에도, 내 일정에도 맞게 뛸 수 있어요.
+              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto text-ko-balance break-keep">
+                내 일정에 맞게 뛸 수 있어요.
               </p>
             </div>
           </div>
@@ -92,23 +99,30 @@ export default function Page() {
           <div className="max-w-4xl mx-auto text-center mb-10">
             <h2
               id="how-to-join-heading"
-              className="text-4xl md:text-6xl font-black tracking-wider mb-5 text-foreground text-ko-balance"
+              className="text-4xl md:text-6xl font-black tracking-wider mb-10 text-foreground text-ko-balance"
             >
               참여 방식
             </h2>
-            <p className="text-lg md:text-2xl text-muted-foreground text-ko-balance">
-              모집 기간과 참여 기간을 분리해, 일정 관리가 쉽고 참여 경험이 명확합니다.
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-12 max-w-4xl mx-auto">
-            <div className="rounded-2xl border border-orange-200 bg-white p-5">
-              <p className="text-sm text-orange-600 font-semibold mb-1">모집 기간</p>
-              <p className="text-xl font-black text-foreground">{getRecruitmentPeriodLabel()}</p>
+          {/* 모집·참여 기간 — CTA 통계와 같은 타이포 스트립 (테두리 카드 없음) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-12 max-w-4xl mx-auto text-center">
+            <div>
+              <p className="text-sm text-orange-600 font-semibold mb-2">모집 기간</p>
+              {/* 두 칸 밑줄이 어긋나지 않게 동일 높이를 맞춥니다. */}
+              <div className="border-b-2 border-orange-300 pb-3 min-h-[56px] flex items-center justify-center">
+                <p className="text-xl md:text-2xl font-black text-foreground text-ko-balance break-keep">
+                  {getRecruitmentPeriodLabel()}
+                </p>
+              </div>
             </div>
-            <div className="rounded-2xl border border-orange-200 bg-white p-5">
-              <p className="text-sm text-orange-600 font-semibold mb-1">참여 기간</p>
-              <p className="text-xl font-black text-foreground">{getRunPeriodLabel()}</p>
+            <div>
+              <p className="text-sm text-orange-600 font-semibold mb-2">참여 기간</p>
+              <div className="border-b-2 border-orange-300 pb-3 min-h-[56px] flex items-center justify-center">
+                <p className="text-xl md:text-2xl font-black text-foreground text-ko-balance break-keep">
+                  {runPeriodLabel}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -161,21 +175,8 @@ export default function Page() {
             {rewardDeliveryNote}
           </p>
 
-          <div className="rounded-2xl border border-orange-200 bg-white p-7 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-black text-foreground mb-4">참여 4단계</h3>
-            <ol className="grid grid-cols-1 md:grid-cols-2 gap-3 text-muted-foreground">
-              {participationSteps.map((step, index) => (
-                <li key={step} className="flex items-center gap-3">
-                  <span className="inline-flex w-7 h-7 rounded-full bg-orange-100 text-orange-700 items-center justify-center text-sm font-bold">
-                    {index + 1}
-                  </span>
-                  <span>{step}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <ParticipationPolicyNotes className="max-w-4xl mx-auto mt-6" />
+          {/* 단계/정책/문의를 한 카드로 통합해 읽기 흐름을 단순화합니다. */}
+          <ParticipationGuideSection className="max-w-4xl mx-auto mt-4" />
         </div>
       </section>
 

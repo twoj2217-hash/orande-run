@@ -12,18 +12,15 @@ export function KeycapKeyringRewardSection({ className }: KeycapKeyringRewardSec
   return (
     <section
       aria-labelledby="keycap-keyring-reward-heading"
-      className={cn("max-w-2xl mx-auto mb-12", className)}
+      className={cn("max-w-3xl mx-auto mb-12", className)}
     >
       <div className="text-center mb-4">
         <h3
           id="keycap-keyring-reward-heading"
-          className="text-2xl md:text-3xl font-black text-foreground mb-2 text-ko-balance"
+          className="text-2xl md:text-3xl font-black text-foreground text-ko-balance"
         >
           완주 리워드
         </h3>
-        <p className="text-sm md:text-base text-muted-foreground text-ko-balance">
-          사진을 누르면 확대해서 디테일을 확인할 수 있어요.
-        </p>
       </div>
 
       {/* 포스터 원본 1장을 사용해 FRONT/SIDE/IN USE와 코스별 구성을 한 번에 보여줍니다. */}
