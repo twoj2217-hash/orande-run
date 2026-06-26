@@ -44,6 +44,17 @@
   .safe-area-pb {
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
+
+  /* 신청 폼 단계 — 스티키 헤더·하단 버튼 영역 고려 */
+  [data-apply-step] {
+    scroll-margin-top: 5rem;
+    scroll-margin-bottom: 6rem;
+  }
+
+  /* 랜딩 참여 방식 섹션 — 스티키 네비 아래로 스크롤 */
+  #how-to-join {
+    scroll-margin-top: 5rem;
+  }
 }
 
 @layer base {
@@ -130,6 +141,20 @@
     @apply bg-background text-foreground;
     word-break: keep-all;
     overflow-wrap: break-word;
+  }
+
+  /* 터치 기기 탭 지연·하이라이트 최소화 */
+  button,
+  a,
+  [role="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (hover: none) {
+    .interactive-chip-selected {
+      transform: none;
+    }
   }
 
   /* 제목 줄 길이 균형 */

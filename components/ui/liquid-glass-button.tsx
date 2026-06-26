@@ -79,6 +79,27 @@ const liquidbuttonVariants = cva(
   }
 )
 
+// 그림자·유리 장식 레이어 — 클릭을 가로채지 않도록 pointer-events-none
+function LiquidButtonDecorations({ isTouchDevice }: { isTouchDevice: boolean }) {
+  return (
+    <>
+      <div
+        className="pointer-events-none absolute inset-0 z-0 rounded-[12px]
+            shadow-[0_2px_8px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.28),0_0_0_1px_rgba(255,255,255,0.12)]
+        transition-shadow duration-200
+        dark:shadow-[0_2px_10px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.1),0_0_0_1px_rgba(255,255,255,0.06)]"
+      />
+      {!isTouchDevice && (
+        <div
+          className="pointer-events-none absolute inset-0 isolate -z-10 overflow-hidden rounded-[12px]"
+          style={{ backdropFilter: 'url("#container-glass")' }}
+        />
+      )}
+      {!isTouchDevice && <GlassFilter />}
+    </>
+  )
+}
+
 function LiquidButton({
   className,
   variant,
@@ -91,23 +112,33 @@ function LiquidButton({
     asChild?: boolean
   }) {
   const Comp = asChild ? Slot : "button"
+  // 터치 기기에서는 무거운 SVG backdrop filter를 생략합니다.
+  const [isTouchDevice, setIsTouchDevice] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0)
+  }, [])
+
+  const variantClasses = liquidbuttonVariants({ variant, size, className })
+
+  // asChild: Slot은 단일 자식만 허용하므로 장식 레이어는 바깥 wrapper에 둡니다.
+  // 단, 크기·패딩·포커스 링(variantClasses)은 실제 클릭 대상인 자식(Comp)에 붙여야
+  // 좌우 패딩 영역까지 모두 탭/클릭되고 키보드 포커스 링도 정상 표시됩니다.
+  if (asChild) {
+    return (
+      <div className="relative inline-flex">
+        <LiquidButtonDecorations isTouchDevice={isTouchDevice} />
+        <Comp data-slot="button" className={cn("relative z-10", variantClasses)} {...props}>
+          {children}
+        </Comp>
+      </div>
+    )
+  }
 
   return (
-    <Comp data-slot="button" className={cn("relative", liquidbuttonVariants({ variant, size, className }))} {...props}>
-      {/* 그림자 레이어: 외곽 깊이 + 상단 하이라이트 + 얇은 테두리 (3단) */}
-      <div
-        className="absolute top-0 left-0 z-0 h-full w-full rounded-[12px]
-            shadow-[0_2px_8px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.28),0_0_0_1px_rgba(255,255,255,0.12)]
-        transition-shadow duration-200
-        dark:shadow-[0_2px_10px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.1),0_0_0_1px_rgba(255,255,255,0.06)]"
-      />
-      {/* 유리 왜곡 레이어: 버튼 외곽 radius와 12px로 통일 */}
-      <div
-        className="absolute top-0 left-0 isolate -z-10 h-full w-full overflow-hidden rounded-[12px]"
-        style={{ backdropFilter: 'url("#container-glass")' }}
-      />
-      <div className="pointer-events-none z-10 ">{children}</div>
-      <GlassFilter />
+    <Comp data-slot="button" className={cn("relative", variantClasses)} {...props}>
+      <LiquidButtonDecorations isTouchDevice={isTouchDevice} />
+      <div className="pointer-events-none relative z-10">{children}</div>
     </Comp>
   )
 }

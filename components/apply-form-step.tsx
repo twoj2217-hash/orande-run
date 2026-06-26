@@ -1,5 +1,6 @@
 "use client"
 
+import { APPLY_FORCE_OPEN_EVENT } from "@/lib/scroll-to-form-error"
 import { cn } from "@/lib/utils"
 import { useCallback, useEffect, useState, type ReactNode } from "react"
 
@@ -40,6 +41,19 @@ export function ApplyFormStep({
   useEffect(() => {
     if (!isComplete) setUserOpened(false)
   }, [isComplete])
+
+  // 검증 실패 시 scrollToFirstFormError가 보내는 이벤트로 모바일 details를 펼칩니다.
+  useEffect(() => {
+    const handleForceOpen = (event: Event) => {
+      const custom = event as CustomEvent<{ stepId: string }>
+      if (custom.detail?.stepId === id) {
+        setUserOpened(true)
+        setHasFocus(true)
+      }
+    }
+    document.addEventListener(APPLY_FORCE_OPEN_EVENT, handleForceOpen)
+    return () => document.removeEventListener(APPLY_FORCE_OPEN_EVENT, handleForceOpen)
+  }, [id])
 
   const handleBlurCapture = useCallback((event: React.FocusEvent<HTMLElement>) => {
     const container = event.currentTarget

@@ -35,6 +35,7 @@ import {
 import { formatPhoneInput, isValidPhone, normalizePhone } from "@/lib/phone-format"
 import { cn } from "@/lib/utils"
 import { formatShippingAddressLabel } from "@/lib/shipping-address"
+import { scrollToFirstFormError, type FormErrors } from "@/lib/scroll-to-form-error"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
@@ -46,20 +47,6 @@ type FormState = {
   name: string
   phone: string
   email: string
-}
-
-type FormErrors = {
-  tier?: string
-  cityId?: string
-  district?: string
-  outsideRegion?: string
-  name?: string
-  phone?: string
-  email?: string
-  shippingZipcode?: string
-  shippingAddress?: string
-  shippingAddressDetail?: string
-  privacyConsent?: string
 }
 
 const VALID_TIER_IDS = new Set(runTiers.map((t) => t.id))
@@ -185,7 +172,10 @@ export function ApplyPageContent() {
 
     const nextErrors = validate()
     setErrors(nextErrors)
-    if (Object.keys(nextErrors).length > 0) return
+    if (Object.keys(nextErrors).length > 0) {
+      scrollToFirstFormError(nextErrors)
+      return
+    }
     if (!selectedTierId || !cityId || !selectedTier) return
 
     setIsSubmitting(true)
@@ -250,7 +240,7 @@ export function ApplyPageContent() {
     <Button
       type="submit"
       form="apply-form"
-      disabled={isSubmitting || !privacyConsent || isRecruitmentClosed}
+      disabled={isSubmitting || isRecruitmentClosed}
       className="w-full h-[52px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg disabled:opacity-70"
     >
       {isSubmitting ? (
@@ -428,6 +418,7 @@ export function ApplyPageContent() {
                     {outsideRegionCopy.label} <span className="text-red-500">*</span>
                   </legend>
                   <input
+                    id="outsideRegion"
                     type="text"
                     value={outsideRegion}
                     onChange={(e) => {
@@ -438,6 +429,7 @@ export function ApplyPageContent() {
                     placeholder={outsideRegionCopy.placeholder}
                     maxLength={50}
                     autoComplete="address-level2"
+                    aria-invalid={Boolean(errors.outsideRegion)}
                   />
                   {errors.outsideRegion && (
                     <p className="text-sm text-red-600 mt-2" role="alert">
@@ -544,6 +536,7 @@ export function ApplyPageContent() {
                   className="w-full h-11 rounded-[10px] border border-orange-200 px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                   placeholder="홍길동"
                   autoComplete="name"
+                  aria-invalid={Boolean(errors.name)}
                 />
                 {errors.name && (
                   <p className="text-sm text-red-600 mt-1" role="alert">
@@ -567,6 +560,7 @@ export function ApplyPageContent() {
                   inputMode="numeric"
                   autoComplete="tel"
                   maxLength={13}
+                  aria-invalid={Boolean(errors.phone)}
                 />
                 {errors.phone && (
                   <p className="text-sm text-red-600 mt-1" role="alert">
@@ -587,6 +581,7 @@ export function ApplyPageContent() {
                   className="w-full h-11 rounded-[10px] border border-orange-200 px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                   placeholder="hello@example.com"
                   autoComplete="email"
+                  aria-invalid={Boolean(errors.email)}
                 />
                 {errors.email && (
                   <p className="text-sm text-red-600 mt-1" role="alert">
@@ -645,6 +640,7 @@ export function ApplyPageContent() {
             <div className="rounded-2xl border border-orange-200 bg-white p-4 sm:p-6 space-y-4">
               <label className="flex items-start gap-3 cursor-pointer min-h-[44px]">
                 <input
+                  id="privacyConsent"
                   type="checkbox"
                   checked={privacyConsent}
                   onChange={(e) => {
@@ -652,6 +648,7 @@ export function ApplyPageContent() {
                     setErrors((prev) => ({ ...prev, privacyConsent: undefined }))
                   }}
                   className="mt-1 h-5 w-5 rounded border-orange-300 text-orange-500 focus-visible:ring-orange-500"
+                  aria-invalid={Boolean(errors.privacyConsent)}
                 />
                 <span className="text-sm text-foreground">
                   <span className="font-semibold">개인정보 수집·이용에 동의합니다</span>{" "}

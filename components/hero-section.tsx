@@ -251,15 +251,26 @@ export default function HeroSection() {
               {brandCopy.heroSubline}
             </p>
 
-            <Link href="/apply" className="inline-block">
+            <div className="flex flex-col gap-3 md:flex-row md:gap-4 items-center justify-center">
               <LiquidButton
+                asChild
                 size="xxl"
                 className="font-semibold text-lg tracking-wide bg-orange-500 border border-orange-100/80 hover:bg-orange-600 active:bg-orange-600/95 text-white shadow-sm"
-                aria-label="참가 신청 페이지로 이동"
               >
-                오랜디런 참여하기
+                <Link href="/apply" aria-label="참가 신청 페이지로 이동">
+                  오랜디런 참여하기
+                </Link>
               </LiquidButton>
-            </Link>
+              <LiquidButton
+                type="button"
+                size="xxl"
+                onClick={() => scrollToSection("#how-to-join")}
+                className="font-semibold text-lg tracking-wide border border-white/60 bg-transparent hover:bg-white/10 active:bg-white/15 text-white"
+                aria-label="참여 방식 안내 섹션으로 이동"
+              >
+                참여 방식 안내
+              </LiquidButton>
+            </div>
           </div>
         </div>
 
