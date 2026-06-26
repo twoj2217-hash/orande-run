@@ -254,8 +254,10 @@ export const paymentInfo = {
 // 문의처 — 카카오톡 오픈채팅
 export const supportContact = {
   label: "카카오톡 오픈채팅",
-  displayName: "OranDe run 문의",
-  openChatUrl: "https://open.kakao.com/o/sR2UpiBi"
+  // 오픈채팅 방 표기와 동일한 이름으로 노출
+  displayName: "OranDe Run 문의",
+  // 문의 오픈채팅 링크 (운영 링크)
+  openChatUrl: "https://open.kakao.com/o/s069CjBi"
 } as const
 
 // 참가 운영 안내 (중복 참여·취소·코스 변경)
