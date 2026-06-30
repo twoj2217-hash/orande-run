@@ -251,9 +251,7 @@ export const supportContact = {
   // 오픈채팅 방 표기와 동일한 이름으로 노출
   displayName: "OranDe Run 문의",
   // 문의 오픈채팅 링크 (운영 링크)
-  openChatUrl: "https://open.kakao.com/o/s069CjBi",
-  // 문의 응답시간 편차를 줄이기 위한 안내 기준
-  responseSla: "기본 응답 목표 24시간 이내"
+  openChatUrl: "https://open.kakao.com/o/s069CjBi"
 } as const
 
 // 입금·확정 정책 — FAQ/랜딩/모달 공통으로 재사용합니다.
@@ -446,7 +444,8 @@ export const faqSections: readonly FaqSection[] = [
         id: "q17",
         question: "문의는 어디로 하면 되나요?",
         answerLines: [
-          `${supportContact.displayName} 오픈채팅에서 받고 있어요. (${supportContact.responseSla})`
+          // 문의 응답 SLA는 노출하지 않고 오픈채팅 안내만 제공합니다.
+          `${supportContact.displayName} 오픈채팅에서 받고 있어요.`
         ]
       },
       {
