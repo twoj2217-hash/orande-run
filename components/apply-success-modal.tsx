@@ -154,7 +154,7 @@ export function ApplySuccessModal({ open, payload, onClose }: ApplySuccessModalP
             {/* 앞으로 진행 방식 안내 (신청 완료 후에만 노출) */}
             <ParticipantGuide variant="compact" />
 
-            {/* 챌린지 종료 후 참고용 완주 인증 안내 */}
+            {/* 모달에서는 중복 안내를 줄인 인증 요약만 보여 줍니다. */}
             <VerificationGuide variant="compact" />
           </div>
         </details>

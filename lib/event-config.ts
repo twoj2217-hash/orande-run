@@ -309,9 +309,9 @@ export const rewardPolicy = {
 export const verificationChecklistItems = [
   "신청 코스(50/70/100km)가 보이는 화면",
   "러닝 앱 거리 기록 캡처 (누적 거리 확인 가능)",
-  `인증 경로: 해시태그 게시물 또는 ${socialLinks.instagramHandle} DM`,
-  "제출자 이름(또는 식별 가능한 닉네임)",
-  "인증 마감일(8/16) 이전 제출"
+  // 인증 경로 안내는 방법 A/B에서 제공하고, 체크리스트는 제출 형식 요건만 유지합니다.
+  "제출자 이름(또는 식별 가능한 닉네임)이 보이는 화면",
+  "인증 마감일 이전 제출"
 ] as const
 
 export type FaqItem = {
@@ -591,7 +591,8 @@ export const participantGuide = {
       bodyCompact:
         "원하시면 비슷한 동네·시간대 참가자 소규모 톡방 연결을 안내해 드려요. (선택)"
     },
-    { phase: "4", title: "완주 인증", body: `SNS 해시태그 게시물 또는 ${socialLinks.instagramHandle} DM으로 기록을 보내 주세요.` },
+    // 상세 제출 경로는 인증 가이드 카드에서 다시 확인할 수 있게 간단 문구로 유지합니다.
+    { phase: "4", title: "완주 인증", body: `SNS 해시태그 또는 ${socialLinks.instagramHandle} DM으로 기록을 제출해 주세요.` },
     { phase: "5", title: "키캡키링 발송", body: "인증 확인 후 코스별 키캡키링을 보내 드려요." }
   ],
   togetherNote: "위 안내는 모두 선택 사항이에요. 편한 방식으로만 참여해 주세요."

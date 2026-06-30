@@ -1,7 +1,6 @@
 "use client"
 
 import {
-  completionPolicy,
   socialLinks,
   verificationChecklistItems,
   verificationConfig
@@ -36,28 +35,22 @@ export function VerificationGuide({ variant = "default", className = "" }: Verif
   if (variant === "compact") {
     return (
       <div className={cn("rounded-2xl border border-orange-200 bg-orange-50/50 p-5 text-left text-sm", className)}>
-        <p className="font-bold text-foreground mb-2">완주 인증 (둘 중 하나)</p>
-        <ul className="space-y-2 text-muted-foreground list-disc pl-4">
-          <li>
-            인스타 피드·스토리에 {hashtags} + 완주 기록 캡처 업로드 ·{" "}
-            <a href={socialLinks.instagram} target="_blank" rel="noreferrer" className="text-orange-600 underline">
-              {socialLinks.instagramHandle}
-            </a>{" "}
-            태그 권장
-          </li>
-          <li>
-            해시태그 인증이 어렵다면{" "}
-            <a href={socialLinks.instagram} target="_blank" rel="noreferrer" className="text-orange-600 underline">
-              {socialLinks.instagramHandle}
-            </a>
-            {" "}DM으로 기록 캡처 보내기
-          </li>
-        </ul>
-        <p className="mt-3 rounded-lg border border-orange-200 bg-white px-3 py-2 text-xs text-muted-foreground">
-          비공개 계정은 DM 인증을 기본 경로로 권장합니다.
+        {/* 신청 완료 모달에서는 핵심 행동만 짧게 보여 중복 안내를 줄입니다. */}
+        <p className="font-bold text-foreground mb-2">완주 인증 (요약)</p>
+        <p className="text-sm text-muted-foreground">
+          인스타 피드·스토리에 <strong className="text-foreground">{hashtags}</strong>와 완주 기록을 올리고, 공식 계정{" "}
+          <a href={socialLinks.instagram} target="_blank" rel="noreferrer" className="text-orange-600 underline">
+            {socialLinks.instagramHandle}
+          </a>{" "}
+          태그해 주세요.
         </p>
-        <p className="text-xs text-muted-foreground mt-3">마감: {verificationConfig.deadlineNote}</p>
-        <p className="text-xs text-muted-foreground mt-2">{verificationConfig.graceNote}</p>
+        <p className="text-xs text-muted-foreground mt-3">
+          자세한 기준은{" "}
+          <Link href="/faq" className="underline underline-offset-2 hover:text-orange-600">
+            참가자 FAQ
+          </Link>
+          에서 확인해 주세요.
+        </p>
       </div>
     )
   }
@@ -82,19 +75,16 @@ export function VerificationGuide({ variant = "default", className = "" }: Verif
         <div className="rounded-2xl border border-orange-100 bg-orange-50/40 p-5">
           <p className="text-sm font-bold text-orange-600 mb-2">방법 A · SNS 인증</p>
           <p className="text-sm text-foreground mb-2">
-            인스타그램 피드 또는 스토리에 아래 해시태그와 함께 완주 기록을 올려 주세요.
+            인스타 피드 또는 스토리에 아래 해시태그와 함께 완주 기록을 올려 주세요.
           </p>
           <p className="text-xs text-muted-foreground mb-2">
             공식 계정{" "}
             <a href={socialLinks.instagram} target="_blank" rel="noreferrer" className="text-orange-600 underline">
               {socialLinks.instagramHandle}
             </a>{" "}
-            태그를 권장해요.
+            태그해 주세요.
           </p>
           <p className="text-base font-bold text-foreground mb-2">{hashtags}</p>
-          <p className="text-xs text-muted-foreground">
-            비공개 계정이거나 스토리만 올린 경우에는 {socialLinks.instagramHandle} DM으로 기록 캡처를 보내 주세요.
-          </p>
         </div>
 
         <div className="rounded-2xl border border-orange-100 bg-orange-50/40 p-5">
@@ -116,9 +106,7 @@ export function VerificationGuide({ variant = "default", className = "" }: Verif
           </button>
         </div>
 
-        <p className="text-sm text-muted-foreground rounded-xl border border-orange-100 bg-orange-50/40 p-4">
-          {completionPolicy.appealGuide}
-        </p>
+        {/* 기본 화면에서는 연장 제출 기준을 우선 노출하고, 이의제기는 FAQ에서 확인하도록 정리합니다. */}
         <p className="text-sm text-muted-foreground rounded-xl border border-orange-100 bg-orange-50/40 p-4">
           {verificationConfig.graceNote}
         </p>
