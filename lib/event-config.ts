@@ -616,6 +616,9 @@ export const participationPolicyBullets = [
 // 모집 상태 — false로 두면 신청 차단 (운영자 수동 스위치)
 export const recruitmentManualOpen = true
 
+// 조기 오픈 — 표시 일정(7/1~) 전에도 신청 허용. 7/1 이후에는 false 로 꺼도 됨
+export const recruitmentEarlyOpen = true
+
 export type RecruitmentStatus = "open" | "upcoming" | "closed" | "tbd"
 
 /** 일정 문자열을 Date로 파싱 (예: "2026. 7. 1", "2026-07-01") */
@@ -651,7 +654,12 @@ export function getRecruitmentStatus(): RecruitmentStatus {
 
 /** 신청 가능 여부 — API/클라이언트에서 동일 기준으로 사용합니다. */
 export function isRecruitmentOpen(): boolean {
-  return getRecruitmentStatus() === "open"
+  if (!recruitmentManualOpen) return false
+  const status = getRecruitmentStatus()
+  if (status === "open") return true
+  // upcoming 이어도 조기 오픈이면 신청 허용 (화면 표시 일정은 eventSchedule 그대로)
+  if (recruitmentEarlyOpen && status === "upcoming") return true
+  return false
 }
 
 /** 배너에 쓸 제목·본문·톤 (open이면 null) */
@@ -661,9 +669,11 @@ export type RecruitmentBannerContent = {
   tone: "info" | "warm" | "closed"
 }
 
-/** 랜딩·신청 폼 상단 배너 (open이면 숨김) */
+/** 랜딩·신청 폼 상단 배너 (open·조기 오픈이면 숨김) */
 export function getRecruitmentBannerContent(): RecruitmentBannerContent | null {
   const status = getRecruitmentStatus()
+  // 조기 오픈 중에는 upcoming 배너를 숨기고 신청 가능 상태로 보여줍니다
+  if (status === "open" || (recruitmentEarlyOpen && status === "upcoming")) return null
   switch (status) {
     case "tbd":
       return {
@@ -683,8 +693,6 @@ export function getRecruitmentBannerContent(): RecruitmentBannerContent | null {
         body: "다음 오랜디런 소식은 이 페이지에서 공지할 예정이에요. 조금만 기다려 주세요.",
         tone: "closed"
       }
-    case "open":
-      return null
   }
 }
 
