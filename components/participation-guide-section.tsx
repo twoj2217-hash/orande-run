@@ -68,8 +68,6 @@ export function ParticipationGuideSection({ className }: ParticipationGuideSecti
           >
             {supportContact.displayName}
           </a>
-          {" · "}
-          {supportContact.responseSla}
         </p>
         {/* 랜딩에서 정책 문서 접근 경로를 고정해 정보 분산을 줄입니다. */}
         <p className="mt-2 text-sm text-muted-foreground">

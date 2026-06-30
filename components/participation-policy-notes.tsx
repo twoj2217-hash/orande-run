@@ -42,8 +42,6 @@ export function ParticipationPolicyNotes({ className, variant = "default" }: Par
         >
           {supportContact.displayName}
         </a>
-        {" · "}
-        {supportContact.responseSla}
       </p>
       <p className={cn("mt-2 text-muted-foreground", isCompact ? "text-xs" : "text-sm")}>
         {policyLinks.map((link, index) => (
