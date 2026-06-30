@@ -6,7 +6,8 @@ import "./globals.css"
 export const metadata: Metadata = {
   title: "OranDe Run | 오랜디런",
   description: brandCopy.metaDescription,
-  generator: "v0.dev"
+  generator: "v0.dev",
+  icons: { icon: "/icon" }
 }
 
 // 전역 폰트/스타일을 적용하는 루트 레이아웃입니다.
