@@ -18,12 +18,17 @@ export function saveSuccessPayload(payload: ApplySuccessPayload): void {
   }
 }
 
-export function readSuccessPayload(): ApplySuccessPayload | null {
+export function readSuccessPayload(options?: { consume?: boolean }): ApplySuccessPayload | null {
   if (typeof window === "undefined") return null
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY)
     if (!raw) return null
-    return JSON.parse(raw) as ApplySuccessPayload
+    const parsed = JSON.parse(raw) as ApplySuccessPayload
+    // 기본 동작은 consume=true로 두어 이전 성공 모달 payload가 다음 신청에 섞이지 않게 합니다.
+    if (options?.consume !== false) {
+      sessionStorage.removeItem(STORAGE_KEY)
+    }
+    return parsed
   } catch {
     return null
   }

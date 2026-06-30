@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { Search } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 // 다음(카카오) 우편번호 API 스크립트 URL
 const DAUM_POSTCODE_SCRIPT_URL =
@@ -131,6 +131,8 @@ type AddressSearchInputProps = {
   addressError?: string
   addressDetailError?: string
   disabled?: boolean
+  /** 주소 검색 팝업/로딩 상태를 부모에 알려 하단 고정 버튼 터치 충돌을 줄입니다. */
+  onSearchStateChange?: (active: boolean) => void
 }
 
 /** 우편번호 검색 + 상세주소 입력 UI */
@@ -144,10 +146,17 @@ export function AddressSearchInput({
   zipcodeError,
   addressError,
   addressDetailError,
-  disabled = false
+  disabled = false,
+  onSearchStateChange
 }: AddressSearchInputProps) {
   const [searchError, setSearchError] = useState<string | null>(null)
   const [isLoadingScript, setIsLoadingScript] = useState(false)
+  const [isPostcodeOpen, setIsPostcodeOpen] = useState(false)
+
+  // 주소 검색 상태를 부모로 전달해 모바일 하단 CTA 겹침을 줄입니다.
+  useEffect(() => {
+    onSearchStateChange?.(isLoadingScript || isPostcodeOpen)
+  }, [isLoadingScript, isPostcodeOpen, onSearchStateChange])
 
   const openPostcodeSearch = async () => {
     if (disabled) return
@@ -164,7 +173,13 @@ export function AddressSearchInput({
 
       // embed 대신 open()을 사용합니다. React 렌더 타이밍과 무관하게 동작합니다.
       new window.daum.Postcode({
+        onclose: () => {
+          // 사용자가 검색창을 닫으면 하단 고정 버튼을 다시 활성화합니다.
+          setIsPostcodeOpen(false)
+        },
         oncomplete: (data) => {
+          // 주소 선택 시 즉시 검색 상태를 해제합니다.
+          setIsPostcodeOpen(false)
           onZipcodeChange(data.zonecode)
           // 도로명(R) 선택 시 roadAddress, 지번(J) 선택 시 jibunAddress를 우선 사용합니다.
           const selectedAddress =
@@ -174,7 +189,10 @@ export function AddressSearchInput({
           onAddressChange(selectedAddress)
         }
       }).open()
+      // open() 이후부터 검색창이 닫힐 때까지를 검색 활성 상태로 간주합니다.
+      setIsPostcodeOpen(true)
     } catch {
+      setIsPostcodeOpen(false)
       setSearchError("주소 검색을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.")
     } finally {
       setIsLoadingScript(false)
@@ -205,11 +223,11 @@ export function AddressSearchInput({
           <button
             type="button"
             onClick={openPostcodeSearch}
-            disabled={disabled || isLoadingScript}
+            disabled={disabled || isLoadingScript || isPostcodeOpen}
             className="h-11 w-full shrink-0 justify-center px-4 rounded-[10px] border border-orange-500 bg-orange-500 text-white font-semibold inline-flex items-center gap-1.5 hover:bg-orange-600 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 sm:w-auto"
           >
             <Search className="w-4 h-4" aria-hidden />
-            {isLoadingScript ? "불러오는 중..." : "주소 검색"}
+            {isLoadingScript ? "불러오는 중..." : isPostcodeOpen ? "검색창 열림" : "주소 검색"}
           </button>
         </div>
         {zipcodeError && (

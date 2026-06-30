@@ -1,7 +1,14 @@
 "use client"
 
-import { participationPolicyBullets, participationSteps, supportContact } from "@/lib/event-config"
+import {
+  depositPolicy,
+  participationPolicyBullets,
+  participationSteps,
+  policyLinks,
+  supportContact
+} from "@/lib/event-config"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 type ParticipationGuideSectionProps = {
   className?: string
@@ -35,6 +42,11 @@ export function ParticipationGuideSection({ className }: ParticipationGuideSecti
 
       {/* 정책/문의는 구분선을 두어 단계 정보와 시각적으로 분리합니다. */}
       <div className="border-t border-orange-100 mt-6 pt-6">
+        {/* 신청/확정 오해를 줄이기 위해 입금 확인 기준을 바로 노출합니다. */}
+        <p className="rounded-xl border border-orange-200 bg-orange-50/70 px-4 py-3 text-sm text-muted-foreground mb-4">
+          <strong className="text-foreground">신청 접수</strong>와 <strong className="text-foreground">참가 확정</strong>은
+          달라요. {depositPolicy.confirmationSla}
+        </p>
         <p className="font-black text-foreground mb-3">참가 안내</p>
         <ul className="space-y-2 text-sm text-muted-foreground">
           {participationPolicyBullets.map((note) => (
@@ -56,6 +68,19 @@ export function ParticipationGuideSection({ className }: ParticipationGuideSecti
           >
             {supportContact.displayName}
           </a>
+          {" · "}
+          {supportContact.responseSla}
+        </p>
+        {/* 랜딩에서 정책 문서 접근 경로를 고정해 정보 분산을 줄입니다. */}
+        <p className="mt-2 text-sm text-muted-foreground">
+          {policyLinks.map((link, index) => (
+            <span key={link.href}>
+              {index > 0 && " · "}
+              <Link href={link.href} className="underline underline-offset-2 hover:text-orange-600">
+                {link.label}
+              </Link>
+            </span>
+          ))}
         </p>
       </div>
     </aside>

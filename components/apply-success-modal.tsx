@@ -13,8 +13,8 @@ import {
   DialogTitle
 } from "@/components/ui/dialog"
 import type { ApplySuccessPayload } from "@/lib/apply-success-storage"
-import { copyPaymentInfo } from "@/lib/copy-payment-info"
-import { paymentInfo } from "@/lib/event-config"
+import { copyPaymentInfo, formatPaymentCopyText } from "@/lib/copy-payment-info"
+import { depositPolicy, formatPolicyValue, paymentInfo } from "@/lib/event-config"
 import { cn } from "@/lib/utils"
 import { Check, CheckCircle2, Copy, Home, Loader2 } from "lucide-react"
 import Link from "next/link"
@@ -75,17 +75,19 @@ export function ApplySuccessModal({ open, payload, onClose }: ApplySuccessModalP
       }}
     >
       <DialogContent
-        className="max-w-md border-orange-200 max-h-[90vh] overflow-y-auto"
+        className="max-w-md border-orange-200 max-h-[90dvh] overflow-y-auto overscroll-contain"
         // 오버레이·바깥 클릭으로 모달이 닫히지 않게 막음
         onPointerDownOutside={(e: Event) => e.preventDefault()}
       >
         <DialogHeader className="text-center sm:text-center">
           <CheckCircle2 className="w-12 h-12 text-orange-500 mx-auto mb-2" aria-hidden />
-          <DialogTitle className="text-2xl font-black">신청 접수 완료!</DialogTitle>
+          <DialogTitle className="text-2xl font-black">신청 접수 완료</DialogTitle>
           <DialogDescription className="text-base text-muted-foreground">
             {payload.name}님 · {payload.tierLabel}
             {payload.locationLabel && <> · {payload.locationLabel}</>}
           </DialogDescription>
+          {/* 신청 완료와 참가 확정의 차이를 첫 화면에서 바로 안내합니다. */}
+          <p className="text-sm font-bold text-orange-700">입금 확인 후 참가가 확정됩니다.</p>
         </DialogHeader>
 
         {/* 지금 당장 할 일: 참가비 입금 */}
@@ -97,6 +99,10 @@ export function ApplySuccessModal({ open, payload, onClose }: ApplySuccessModalP
           <p className="text-sm text-muted-foreground">예금주: {paymentInfo.accountHolder}</p>
           <p className="text-lg font-black text-orange-600 mt-2">{feeFormatter.format(payload.fee)}원</p>
           <p className="text-xs text-muted-foreground mt-2">입금자명: {payload.name}</p>
+          <p className="text-xs text-muted-foreground mt-2">{depositPolicy.confirmationSla}</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            입금 기한: {formatPolicyValue(depositPolicy.paymentDeadline)}
+          </p>
 
           <Button
             type="button"
@@ -123,6 +129,18 @@ export function ApplySuccessModal({ open, payload, onClose }: ApplySuccessModalP
               </>
             )}
           </Button>
+          {copyState === "error" && (
+            <p className="mt-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs text-red-700 select-all break-all">
+              {/* 복사가 막힌 환경에서도 수동 복사가 가능하도록 원문을 노출합니다. */}
+              {formatPaymentCopyText({
+                bank: paymentInfo.bank,
+                accountNumber: paymentInfo.accountNumber,
+                accountHolder: paymentInfo.accountHolder,
+                fee: payload.fee,
+                depositorName: payload.name
+              })}
+            </p>
+          )}
         </div>
 
         {/* 입금 외 안내는 기본 접기로 제공해 첫 화면 집중도를 높입니다. */}
@@ -160,6 +178,13 @@ export function ApplySuccessModal({ open, payload, onClose }: ApplySuccessModalP
             className="text-center text-sm text-muted-foreground underline underline-offset-2 hover:text-orange-600"
           >
             참여 방법 다시 보기
+          </Link>
+          <Link
+            href="/faq"
+            onClick={onClose}
+            className="text-center text-sm text-muted-foreground underline underline-offset-2 hover:text-orange-600"
+          >
+            FAQ 확인하기
           </Link>
         </DialogFooter>
       </DialogContent>

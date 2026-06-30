@@ -1,12 +1,20 @@
 import { applyRequestSchema, getTierById } from "@/lib/apply-schema"
-import { getRecruitmentStatus } from "@/lib/event-config"
+import { getRecruitmentStatus, isRecruitmentOpen } from "@/lib/event-config"
 import { postToGoogleSheetsWebhook } from "@/lib/google-sheets-webhook"
 import { NextResponse } from "next/server"
 
 /** Google Sheets Apps Script 웹훅으로 신청 데이터 전달 */
 export async function POST(request: Request) {
-  if (getRecruitmentStatus() === "closed") {
-    return NextResponse.json({ ok: false, error: "현재 모집이 마감되었습니다." }, { status: 403 })
+  // 서버에서도 "모집 중(open)" 상태에서만 접수를 허용합니다.
+  if (!isRecruitmentOpen()) {
+    const recruitmentStatus = getRecruitmentStatus()
+    const statusMessage =
+      recruitmentStatus === "upcoming"
+        ? "아직 모집 오픈 전입니다. 모집 시작일 이후 다시 신청해 주세요."
+        : recruitmentStatus === "tbd"
+          ? "모집 일정이 아직 확정되지 않았습니다."
+          : "현재 모집이 마감되었습니다."
+    return NextResponse.json({ ok: false, error: statusMessage }, { status: 403 })
   }
 
   const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL

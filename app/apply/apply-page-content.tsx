@@ -16,13 +16,17 @@ import {
 import type { DaejeonDistrict, LocationCityId } from "@/lib/apply-schema"
 import {
   daejeonDistricts,
+  depositPolicy,
+  formatPolicyValue,
   formatLocationLabel,
   getRecruitmentPeriodLabel,
   getRecruitmentStatus,
   getRunPeriodLabel,
+  isRecruitmentOpen,
   locationCities,
   outsideRegionCopy,
   paymentInfo,
+  policyLinks,
   privacyConsentSummary,
   runningDayOptions,
   runningPreferenceCopy,
@@ -61,7 +65,9 @@ function getInitialTierFromParams(searchParams: URLSearchParams): RunTierId | nu
 export function ApplyPageContent() {
   const searchParams = useSearchParams()
   const recruitmentStatus = getRecruitmentStatus()
-  const isRecruitmentClosed = recruitmentStatus === "closed"
+  // 클라이언트에서도 서버와 동일하게 open 상태에서만 제출을 허용합니다.
+  const isRecruitmentOpenNow = isRecruitmentOpen()
+  const isRecruitmentBlocked = !isRecruitmentOpenNow
 
   const [selectedTierId, setSelectedTierId] = useState<RunTierId | null>(() =>
     getInitialTierFromParams(searchParams)
@@ -81,6 +87,7 @@ export function ApplyPageContent() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [successPayload, setSuccessPayload] = useState<ApplySuccessPayload | null>(null)
+  const [isAddressSearchActive, setIsAddressSearchActive] = useState(false)
 
   const selectedTier = useMemo(() => runTiers.find((tier) => tier.id === selectedTierId) ?? null, [selectedTierId])
 
@@ -168,7 +175,8 @@ export function ApplyPageContent() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    if (isRecruitmentClosed) return
+    // 모집 상태가 open이 아니면 클라이언트에서 즉시 제출을 막습니다.
+    if (isRecruitmentBlocked) return
 
     const nextErrors = validate()
     setErrors(nextErrors)
@@ -240,7 +248,7 @@ export function ApplyPageContent() {
     <Button
       type="submit"
       form="apply-form"
-      disabled={isSubmitting || isRecruitmentClosed}
+      disabled={isSubmitting || isRecruitmentBlocked}
       className="w-full h-[52px] bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg disabled:opacity-70"
     >
       {isSubmitting ? (
@@ -248,8 +256,12 @@ export function ApplyPageContent() {
           <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
           접수 중...
         </>
-      ) : isRecruitmentClosed ? (
-        "모집 마감"
+      ) : isRecruitmentBlocked ? (
+        recruitmentStatus === "upcoming"
+          ? "모집 오픈 전"
+          : recruitmentStatus === "tbd"
+            ? "일정 공지 대기"
+            : "모집 마감"
       ) : (
         "신청 완료하기"
       )}
@@ -273,12 +285,28 @@ export function ApplyPageContent() {
         <p className="text-muted-foreground mb-4">
           모집 {getRecruitmentPeriodLabel()} · 참여 {getRunPeriodLabel()}
         </p>
+        {/* 정책 확인 시 현재 폼 입력값 이탈을 줄이기 위해 새 탭으로 링크를 엽니다. */}
+        <div className="mb-4 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+          {policyLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:text-orange-600"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
 
         <RecruitmentBanner className="mb-6" context="apply" />
 
-        {isRecruitmentClosed && (
+        {isRecruitmentBlocked && (
           <div className="rounded-xl border border-red-200 bg-red-50 text-red-800 px-4 py-3 text-sm mb-6" role="alert">
-            현재 모집이 마감되어 신청을 받지 않습니다.
+            {recruitmentStatus === "upcoming" && "아직 모집 시작 전이에요. 오픈 일정에 다시 신청해 주세요."}
+            {recruitmentStatus === "tbd" && "모집 일정이 아직 확정되지 않았어요. 공지 후 신청이 열립니다."}
+            {recruitmentStatus === "closed" && "현재 모집이 마감되어 신청을 받지 않습니다."}
           </div>
         )}
 
@@ -622,7 +650,9 @@ export function ApplyPageContent() {
                 zipcodeError={errors.shippingZipcode}
                 addressError={errors.shippingAddress}
                 addressDetailError={errors.shippingAddressDetail}
-                disabled={isRecruitmentClosed}
+                disabled={isRecruitmentBlocked}
+                // 주소 검색 팝업이 열린 동안 하단 고정 제출바 터치 충돌을 줄입니다.
+                onSearchStateChange={setIsAddressSearchActive}
               />
 
               {shippingPreview && (
@@ -654,6 +684,27 @@ export function ApplyPageContent() {
                   <span className="font-semibold">개인정보 수집·이용에 동의합니다</span>{" "}
                   <span className="text-red-500">*</span>
                   <span className="block text-xs text-muted-foreground mt-1">{privacyConsentSummary}</span>
+                  {/* 동의 문서 확인 후 폼으로 쉽게 돌아오도록 새 탭 링크를 사용합니다. */}
+                  <span className="mt-1 block text-xs text-muted-foreground">
+                    자세히 보기:{" "}
+                    <Link
+                      href="/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-2 hover:text-orange-600"
+                    >
+                      개인정보 처리방침
+                    </Link>
+                    {" · "}
+                    <Link
+                      href="/terms"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-2 hover:text-orange-600"
+                    >
+                      참가 약관
+                    </Link>
+                  </span>
                 </span>
               </label>
               {errors.privacyConsent && (
@@ -676,6 +727,8 @@ export function ApplyPageContent() {
                 신청 완료 후 <strong className="text-foreground">{paymentInfo.bank}</strong> 계좌로 코스별 참가비를
                 입금해 주세요. 입금 확인 후 참가가 확정됩니다.
               </p>
+              <p className="mt-2 text-xs">{depositPolicy.confirmationSla}</p>
+              <p className="mt-1 text-xs">입금 기한: {formatPolicyValue(depositPolicy.paymentDeadline)}</p>
               {selectedTier && (
                 <p className="mt-2 font-bold text-orange-600">
                   선택 코스 참가비: {feeFormatter.format(selectedTier.fee)}원
@@ -694,7 +747,7 @@ export function ApplyPageContent() {
         </form>
       </div>
 
-      <ApplyStickySubmit>
+      <ApplyStickySubmit className={cn(isAddressSearchActive && "pointer-events-none opacity-70")}>
         {submitError && (
           <p className="text-sm text-red-600 text-center mb-2" role="alert">
             {submitError}

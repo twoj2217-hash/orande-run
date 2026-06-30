@@ -271,6 +271,16 @@ export default function HeroSection() {
                 참여 방식 안내
               </LiquidButton>
             </div>
+            {/* 정책 탐색 링크를 히어로에 바로 배치해 정보 접근 동선을 줄입니다. */}
+            <p className="mt-4 text-sm text-orange-50/95">
+              <Link href="/faq" className="underline underline-offset-2 hover:text-white">
+                참가자 FAQ
+              </Link>
+              {" · "}
+              <Link href="/terms" className="underline underline-offset-2 hover:text-white">
+                참가 약관
+              </Link>
+            </p>
           </div>
         </div>
 

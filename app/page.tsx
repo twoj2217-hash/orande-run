@@ -5,6 +5,7 @@ import { Timeline } from "@/components/ui/timeline"
 import CTASection from "@/components/cta-section"
 import { ParticipationGuideSection } from "@/components/participation-guide-section"
 import { RecruitmentBanner } from "@/components/recruitment-banner"
+import { VerificationGuide } from "@/components/verification-guide"
 import {
   getRecruitmentPeriodLabel,
   getRunEndLabel,
@@ -177,6 +178,11 @@ export default function Page() {
 
           {/* 단계/정책/문의를 한 카드로 통합해 읽기 흐름을 단순화합니다. */}
           <ParticipationGuideSection className="max-w-4xl mx-auto mt-4" />
+
+          {/* 완주 인증 기준을 랜딩에서도 바로 확인할 수 있도록 별도 섹션을 노출합니다. */}
+          <section id="verification" className="max-w-4xl mx-auto mt-10">
+            <VerificationGuide />
+          </section>
         </div>
       </section>
 

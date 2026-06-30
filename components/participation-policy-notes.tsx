@@ -1,5 +1,6 @@
-import { participationPolicyBullets, supportContact } from "@/lib/event-config"
+import { participationPolicyBullets, policyLinks, supportContact } from "@/lib/event-config"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 type ParticipationPolicyNotesProps = {
   className?: string
@@ -41,6 +42,18 @@ export function ParticipationPolicyNotes({ className, variant = "default" }: Par
         >
           {supportContact.displayName}
         </a>
+        {" · "}
+        {supportContact.responseSla}
+      </p>
+      <p className={cn("mt-2 text-muted-foreground", isCompact ? "text-xs" : "text-sm")}>
+        {policyLinks.map((link, index) => (
+          <span key={link.href}>
+            {index > 0 && " · "}
+            <Link href={link.href} className="underline underline-offset-2 hover:text-orange-600">
+              {link.label}
+            </Link>
+          </span>
+        ))}
       </p>
     </aside>
   )
