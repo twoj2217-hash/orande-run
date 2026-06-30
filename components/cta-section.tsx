@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/liquid-glass-button"
 import { BalancedText } from "@/components/ui/balanced-text"
 import { eventSchedule, runTiers } from "@/lib/event-config"
+import { cn } from "@/lib/utils"
 import { motion, useReducedMotion } from "framer-motion"
 import Link from "next/link"
 
@@ -16,7 +17,12 @@ export default function CTASection() {
   // 운영 설정 변경 시 CTA 숫자도 자동으로 맞춰지도록 동적 값으로 계산합니다.
   const stats = [
     { value: "3", label: "코스 선택" },
-    { value: `${feeFormatter.format(minFee)}~${feeFormatter.format(maxFee)}원`, label: "참가비" },
+    {
+      value: `${feeFormatter.format(minFee)}~${feeFormatter.format(maxFee)}원`,
+      label: "참가비",
+      // 참가비 숫자는 길어서 줄바꿈이 깨지기 쉬우므로 한 줄 고정 + 한 단계 작은 크기를 사용합니다.
+      valueClassName: "text-lg sm:text-xl md:text-2xl whitespace-nowrap tracking-tight"
+    },
     { value: `${eventSchedule.participationWeeks}주`, label: "버추얼 런" }
   ]
 
@@ -53,7 +59,14 @@ export default function CTASection() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 mb-16 max-w-2xl mx-auto">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center border-b-2 border-orange-300 pb-3">
-                <div className="text-xl sm:text-2xl md:text-3xl font-black text-foreground mb-1">{stat.value}</div>
+                <div
+                  className={cn(
+                    "text-xl sm:text-2xl md:text-3xl font-black text-foreground mb-1",
+                    stat.valueClassName
+                  )}
+                >
+                  {stat.value}
+                </div>
                 <div className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</div>
               </div>
             ))}
