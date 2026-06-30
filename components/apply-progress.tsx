@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 // 폼 7단계 — IntersectionObserver로 현재 단계 감지
 export const APPLY_STEPS = ["코스", "지역", "계획", "정보", "발송지", "동의", "입금"] as const
@@ -20,6 +20,11 @@ type ApplyProgressProps = {
   className?: string
 }
 
+/** 레이아웃 시프트 직후 IO가 다음 단계로 튀지 않도록 잠시 무시합니다. */
+const LAYOUT_SHIFT_IGNORE_MS = 250
+/** 폼 높이 변화 시 observer 재등록 디바운스 */
+const RESIZE_DEBOUNCE_MS = 100
+
 /** 현재 뷰포트에서 보이는 단계 요소를 찾습니다 (모바일/데스크톱 id 중복 해결). */
 function getVisibleStepElement(stepId: string): HTMLElement | null {
   const candidates = [
@@ -37,8 +42,19 @@ function getVisibleStepElement(stepId: string): HTMLElement | null {
 
 export function ApplyProgress({ className }: ApplyProgressProps) {
   const [activeIndex, setActiveIndex] = useState(0)
+  const layoutShiftingRef = useRef(false)
+  const layoutShiftEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const resizeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
+    const markLayoutShift = () => {
+      layoutShiftingRef.current = true
+      if (layoutShiftEndTimerRef.current) clearTimeout(layoutShiftEndTimerRef.current)
+      layoutShiftEndTimerRef.current = setTimeout(() => {
+        layoutShiftingRef.current = false
+      }, LAYOUT_SHIFT_IGNORE_MS)
+    }
+
     const observeSteps = () => {
       const sections = APPLY_STEP_IDS.map((id) => getVisibleStepElement(id)).filter(
         Boolean
@@ -48,6 +64,9 @@ export function ApplyProgress({ className }: ApplyProgressProps) {
 
       const observer = new IntersectionObserver(
         (entries) => {
+          // fieldset 마운트 등으로 높이가 바뀌는 순간 진행바가 다음 단계로 점프하는 것을 방지
+          if (layoutShiftingRef.current) return
+
           const visible = entries
             .filter((e) => e.isIntersecting)
             .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
@@ -69,8 +88,12 @@ export function ApplyProgress({ className }: ApplyProgressProps) {
 
     // 단계 접힘/펼침으로 높이가 바뀌면 관찰 대상을 다시 등록합니다.
     const resizeObserver = new ResizeObserver(() => {
-      observer?.disconnect()
-      observer = observeSteps()
+      markLayoutShift()
+      if (resizeDebounceRef.current) clearTimeout(resizeDebounceRef.current)
+      resizeDebounceRef.current = setTimeout(() => {
+        observer?.disconnect()
+        observer = observeSteps()
+      }, RESIZE_DEBOUNCE_MS)
     })
 
     const form = document.getElementById("apply-form")
@@ -79,6 +102,8 @@ export function ApplyProgress({ className }: ApplyProgressProps) {
     return () => {
       observer?.disconnect()
       resizeObserver.disconnect()
+      if (layoutShiftEndTimerRef.current) clearTimeout(layoutShiftEndTimerRef.current)
+      if (resizeDebounceRef.current) clearTimeout(resizeDebounceRef.current)
     }
   }, [])
 

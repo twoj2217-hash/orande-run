@@ -39,6 +39,7 @@ import {
 import { formatPhoneInput, isValidPhone, normalizePhone } from "@/lib/phone-format"
 import { cn } from "@/lib/utils"
 import { formatShippingAddressLabel } from "@/lib/shipping-address"
+import { runWithPreservedScroll } from "@/lib/preserve-scroll-on-layout"
 import { scrollToFirstFormError, type FormErrors } from "@/lib/scroll-to-form-error"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
@@ -363,7 +364,7 @@ export function ApplyPageContent() {
             summary={locationSummary}
             isComplete={!!locationPreview}
           >
-            <div className="rounded-2xl border border-orange-200 bg-white p-4 sm:p-6 space-y-5">
+            <div className="rounded-2xl border border-orange-200 bg-white p-4 sm:p-6 space-y-5 [overflow-anchor:none]">
               <fieldset>
                 <legend className="text-sm font-semibold text-foreground mb-3">
                   지역 선택 <span className="text-red-500">*</span>
@@ -373,19 +374,23 @@ export function ApplyPageContent() {
                     <button
                       key={city.id}
                       type="button"
-                      onClick={() => {
-                        setCityId(city.id)
-                        if (city.id === "outside") {
-                          setDistrict(null)
-                        } else {
-                          setOutsideRegion("")
-                        }
-                        setErrors((prev) => ({
-                          ...prev,
-                          cityId: undefined,
-                          district: undefined,
-                          outsideRegion: undefined
-                        }))
+                      onClick={(event) => {
+                        // 모바일: 탭 후 focus scroll·fieldset 마운트로 3단계로 밀리는 현상 방지
+                        runWithPreservedScroll(() => {
+                          setCityId(city.id)
+                          if (city.id === "outside") {
+                            setDistrict(null)
+                          } else {
+                            setOutsideRegion("")
+                          }
+                          setErrors((prev) => ({
+                            ...prev,
+                            cityId: undefined,
+                            district: undefined,
+                            outsideRegion: undefined
+                          }))
+                        })
+                        event.currentTarget.blur()
                       }}
                       className={cn(
                         "interactive-chip h-11 px-5 rounded-[10px] border font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500",
@@ -406,6 +411,8 @@ export function ApplyPageContent() {
                 )}
               </fieldset>
 
+              {cityId && (
+                <div className="min-h-[9.5rem]">
               {cityId === "daejeon" && (
                 <fieldset>
                   <legend className="text-sm font-semibold text-foreground mb-3">
@@ -416,9 +423,12 @@ export function ApplyPageContent() {
                       <button
                         key={gu}
                         type="button"
-                        onClick={() => {
-                          setDistrict(gu)
-                          setErrors((prev) => ({ ...prev, district: undefined }))
+                        onClick={(event) => {
+                          runWithPreservedScroll(() => {
+                            setDistrict(gu)
+                            setErrors((prev) => ({ ...prev, district: undefined }))
+                          })
+                          event.currentTarget.blur()
                         }}
                         className={cn(
                           "interactive-chip h-11 px-4 rounded-[10px] border font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500",
@@ -465,6 +475,8 @@ export function ApplyPageContent() {
                     </p>
                   )}
                 </fieldset>
+              )}
+                </div>
               )}
 
               {locationPreview && (
