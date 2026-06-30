@@ -54,7 +54,8 @@ function NavLink({ item, isActive, variant, onNavigate }: NavLinkProps) {
       {item.name}
       <span
         className={cn(
-          "absolute bottom-0 left-0 h-0.5 transition-all duration-300 ease-out",
+          // 밑줄 애니메이션은 width만 전환해 불필요한 전역 트랜지션을 피합니다.
+          "absolute bottom-0 left-0 h-0.5 transition-[width] duration-300 ease-out",
           isHero ? "bg-orange-100" : "bg-orange-500",
           isActive ? "w-full" : "w-0 group-hover:w-full"
         )}
@@ -174,10 +175,14 @@ export default function HeroSection() {
           className="object-cover object-center"
           sizes="100vw"
         />
-        {/* 오렌지 오버레이 — 단일 그라데이션 */}
-        <div className="absolute inset-0 bg-orange-500/50" aria-hidden />
+        {/* CTA/카피 가독성을 위해 단일 오버레이를 조금 더 진하게 유지합니다. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-orange-700/55 to-orange-900/65" aria-hidden />
 
-        <nav className="relative z-20 flex items-center justify-between p-6 md:p-8" aria-label="주요 메뉴">
+        {/* 노치 기기에서도 상단 메뉴가 잘리지 않도록 safe-area를 반영합니다. */}
+        <nav
+          className="relative z-20 flex items-center justify-between px-6 md:px-8 pt-[max(1.5rem,env(safe-area-inset-top))] pb-6 md:pb-8"
+          aria-label="주요 메뉴"
+        >
           <div className="text-white font-black text-xl tracking-wider drop-shadow-sm">OranDe Run</div>
 
           <div className="hidden md:flex items-center space-x-8">
@@ -251,7 +256,8 @@ export default function HeroSection() {
               {brandCopy.heroSubline}
             </p>
 
-            <div className="flex flex-col gap-3 md:flex-row md:gap-4 items-center justify-center">
+            {/* 히어로에서는 "신청"만 주 CTA로 두고, 나머지는 보조 탐색으로 위계를 낮춥니다. */}
+            <div className="flex flex-col gap-3 items-center justify-center">
               <LiquidButton
                 asChild
                 size="xxl"
@@ -261,23 +267,28 @@ export default function HeroSection() {
                   오랜디런 참여하기
                 </Link>
               </LiquidButton>
-              <LiquidButton
+              <button
                 type="button"
-                size="xxl"
                 onClick={() => scrollToSection("#how-to-join")}
-                className="font-semibold text-lg tracking-wide border border-white/60 bg-transparent hover:bg-white/10 active:bg-white/15 text-white"
+                className="h-11 px-4 text-sm font-semibold text-orange-50 underline underline-offset-4 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded-[10px]"
                 aria-label="참여 방식 안내 섹션으로 이동"
               >
-                참여 방식 안내
-              </LiquidButton>
+                참여 방식 먼저 보기
+              </button>
             </div>
             {/* 정책 탐색 링크를 히어로에 바로 배치해 정보 접근 동선을 줄입니다. */}
             <p className="mt-4 text-sm text-orange-50/95">
-              <Link href="/faq" className="underline underline-offset-2 hover:text-white">
+              <Link
+                href="/faq"
+                className="underline underline-offset-2 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded-sm"
+              >
                 참가자 FAQ
               </Link>
               {" · "}
-              <Link href="/terms" className="underline underline-offset-2 hover:text-white">
+              <Link
+                href="/terms"
+                className="underline underline-offset-2 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded-sm"
+              >
                 참가 약관
               </Link>
             </p>
@@ -288,7 +299,7 @@ export default function HeroSection() {
         <button
           type="button"
           onClick={() => scrollToSection("#community")}
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 text-white/90 hover:text-white h-11 w-11 flex items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 motion-safe:animate-bounce"
+          className="absolute bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-20 text-white/90 hover:text-white h-11 w-11 flex items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 motion-safe:animate-bounce"
           aria-label="다음 섹션으로 스크롤"
         >
           <ChevronDown size={28} aria-hidden />
